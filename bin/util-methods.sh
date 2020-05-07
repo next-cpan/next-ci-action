@@ -18,8 +18,9 @@ function parse_env {
 		exit 1
 	fi
 	if [[ -z "$GITHUB_NAME" ]]; then
-		echo "Set the GITHUB_NAME env variable."
-		exit 1
+		GITHUB_NAME="MyName"
+        #echo "Set the GITHUB_NAME env variable."
+		#exit 1
 	fi
 	export GIT_NAME="$GITHUB_NAME"
 	export GIT_TOKEN="$GITHUB_TOKEN"

@@ -7,7 +7,7 @@ DIR=/usr/bin
 
 
 # See: https://github.com/koalaman/shellcheck/wiki/SC1090
-# Don't the import order
+# Don't alter the import order
 # shellcheck disable=SC1091
 # shellcheck source=/usr/bin
 . "$DIR"/global-variables.sh
