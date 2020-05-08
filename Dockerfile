@@ -1,16 +1,14 @@
-FROM alpine:latest
+# could probably use a lighter source image
+FROM perldocker/perl-tester:5.30
 
 LABEL "com.github.actions.name"="Play Pull Request"
 LABEL "com.github.actions.description"="Automatically Check Pull Requests"
 LABEL "com.github.actions.icon"="check-square"
 LABEL "com.github.actions.color"="blue"
 
-RUN	apk add --no-cache \
-	bash \
-	ca-certificates \
-	curl \
-	perl \
-	jq
+RUN apt-get update && \
+        apt-get dist-upgrade -y && \
+        apt-get install -y curl jq
 
 RUN perl -v
 
@@ -18,9 +16,10 @@ RUN perl -v
 COPY cpanfile /action/
 WORKDIR /action
 #RUN curl -fsSL --compressed https://git.io/cpm > cpm && chmod +x cpm
-RUN curl -fsSL --compressed https://raw.githubusercontent.com/skaji/cpm/0.992/cpm > cpm && chmod +x cpm
-RUN ./cpm --version
-RUN ./cpm install -g --show-build-log-on-failure --cpanfile=./cpanfile
+#RUN curl -fsSL --compressed https://raw.githubusercontent.com/skaji/cpm/0.992/cpm > cpm && chmod +x cpm
+#RUN curl -L https://cpanmin.us/ -o cpanm && chmod +x cpanm
+#RUN ./cpanm --version
+RUN cpanm --installdeps .
 
 COPY /bin /usr/bin/
 
