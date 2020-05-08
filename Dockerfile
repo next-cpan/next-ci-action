@@ -21,6 +21,7 @@ WORKDIR /action
 #RUN ./cpanm --version
 RUN cpanm --installdeps .
 
+COPY run.pl /action/
 COPY lib /action/lib
 COPY /bin /usr/bin/
 
