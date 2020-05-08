@@ -18,7 +18,10 @@ parse_env
 export PR_NUMBER=$(jq -r ".number" "$GITHUB_EVENT_PATH")
 export REPO_FULLNAME=$(jq -r ".repository.full_name" "$GITHUB_EVENT_PATH")
 
-echo "Collecting information about PR #$PR_NUMBER of $REPO_FULLNAME..."
+export TARGET_BRANCH=$(jq -r ".pull_request.base.ref" "$GITHUB_EVENT_PATH")
+export HEAD_SHA=$(jq -r ".pull_request.sha" "$GITHUB_EVENT_PATH")
+
+echo "Collecting information about PR #$PR_NUMBER of $REPO_FULLNAME to $TARGET_BRANCH on $HEAD_SHA"
 
 echo "## Workflow Conclusion"
 echo "$WORKFLOW_CONCLUSION" # neutral, success, cancelled, timed_out, failure
