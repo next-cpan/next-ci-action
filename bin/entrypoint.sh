@@ -15,7 +15,7 @@ DIR=/usr/bin
 # Parse Environment Variables
 parse_env
 
-export PR_NUMBER=$(jq -r ".issue.number" "$GITHUB_EVENT_PATH")
+export PR_NUMBER=$(jq -r ".number" "$GITHUB_EVENT_PATH")
 export REPO_FULLNAME=$(jq -r ".repository.full_name" "$GITHUB_EVENT_PATH")
 
 echo "Collecting information about PR #$PR_NUMBER of $REPO_FULLNAME..."
