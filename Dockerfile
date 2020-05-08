@@ -9,8 +9,16 @@ RUN	apk add --no-cache \
 	bash \
 	ca-certificates \
 	curl \
+	perl \
 	jq
+
+# install App::cpm
+RUN curl -fsSL --compressed https://git.io/cpm > cpm && chmod +x
+
+COPY cpanfile /action/
+WORKDIR /action
+RUN cpm -g install --cpanfile=cpanfile
 
 COPY /bin /usr/bin/
 
-ENTRYPOINT ["autobuild.sh"]
+ENTRYPOINT ["entrypoint.sh"]
