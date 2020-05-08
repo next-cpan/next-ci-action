@@ -21,6 +21,7 @@ WORKDIR /action
 #RUN ./cpanm --version
 RUN cpanm --installdeps .
 
+COPY lib /action/lib
 COPY /bin /usr/bin/
 
 ENTRYPOINT ["entrypoint.sh"]

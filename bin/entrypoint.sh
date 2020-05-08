@@ -26,24 +26,26 @@ cat "$GITHUB_EVENT_PATH"
 
 action=$(jq --raw-output .action "$GITHUB_EVENT_PATH")
 
-if [ "$action" == "labeled" ]; then
-	pr_num=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-elif [ "$action" == "submitted" ]; then
-	review_state=$(jq --raw-output .review.state "$GITHUB_EVENT_PATH")
-	if [ "$review_state" == "approved" ]; then
-		pr_num=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")	
-	else
-		echo "Nothing to do for review $review_state"	
-		exit 0
-	fi
-elif [[ "$action" == "pr-build-success"* ]]; then
-	event="pr-build-success"
+/action/run.pl $action
 
-	IFS=' '
-	read -ra actionParts <<< "$action"
+# if [ "$action" == "labeled" ]; then
+# 	pr_num=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+# elif [ "$action" == "submitted" ]; then
+# 	review_state=$(jq --raw-output .review.state "$GITHUB_EVENT_PATH")
+# 	if [ "$review_state" == "approved" ]; then
+# 		pr_num=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")	
+# 	else
+# 		echo "Nothing to do for review $review_state"	
+# 		exit 0
+# 	fi
+# elif [[ "$action" == "pr-build-success"* ]]; then
+# 	event="pr-build-success"
+
+# 	IFS=' '
+# 	read -ra actionParts <<< "$action"
 	
-	pr_num="${actionParts[1]}"
-else 
-	echo "$action is not supported"
-	exit 0
-fi
+# 	pr_num="${actionParts[1]}"
+# else 
+# 	echo "$action is not supported"
+# 	exit 0
+# fi
