@@ -9,3 +9,7 @@ requires 'File::pushd'      => 0;
 requires 'File::Which'      => 0;
 requires 'File::Basename'   => 0;
 requires 'Umask::Local'     => 0;
+
+on test => sub {
+	requires 'Test::More';
+};
