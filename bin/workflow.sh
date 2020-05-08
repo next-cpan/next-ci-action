@@ -21,6 +21,11 @@ function check_openPullRequest () {
 
     if [ "$pr_from_maintainer" == true ]; then
         addComment $PR_NUMBER "Clean PR from Maintainer merging to p5 branch"
+        git tag current_pr_to_merge
+        git checkout -b p5 origin/p5
+        git merge current_pr_to_merge --no-edit
+        git push origin p5
+        # PR should be auto closed...
     else
         addComment $PR_NUMBER "Requesting Code Review from maintainers"
     fi
