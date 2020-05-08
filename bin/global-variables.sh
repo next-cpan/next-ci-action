@@ -3,6 +3,10 @@
 set -xo pipefail
 
 
+export URI=https://api.github.com
+export API_HEADER="Accept: application/vnd.github.v3+json"
+export AUTH_HEADER="Authorization: token $GITHUB_TOKEN"
+
 # Setup variables
 export PR_BRANCH=""
 export BASE_BRANCH=""

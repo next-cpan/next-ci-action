@@ -261,6 +261,26 @@ function triggerCommentBuild {
     log "Build triggered for $pr_num"
 }
 
+function addComment {
+    log "Function triggerBuild"
+
+    local pr_num
+    pr_num=$1
+    local comment
+    comment=$2
+
+    local commentsApi
+    # shellcheck disable=SC2059
+    commentsApi=$(printf "$GIT_ISSUES_COMMENTS_API" "$pr_num")
+
+    curl -s -X POST -u "$GIT_NAME":"$GIT_TOKEN" -H "Content-Type: application/json" -H "Accept: application/vnd.github.v3+json" "$commentsApi" -d "
+    {
+        \"body\": \"$comment\"
+    }"
+
+    log "add comment '$comment' to $pr_num"
+}
+
 function triggerBuild {
     local pr_num
     pr_num=$1
@@ -316,6 +336,18 @@ function isPRCloseAndMerged {
     else 
         echo false
     fi
+}
+
+function closePR {
+    local pr_num
+    pr_num=$1
+
+    # https://developer.github.com/v3/pulls/#update-a-pull-request
+    curl -X PATCH -s -H "${AUTH_HEADER}" -H "${API_HEADER}" "${URI}/repos/$REPO_FULLNAME/pulls/$pr_num" -d '
+    {
+      "state": "closed",
+    }
+    '
 }
 
 function deleteBranch {

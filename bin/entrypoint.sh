@@ -10,6 +10,8 @@ DIR=/usr/bin
 . "$DIR"/util-methods.sh
 . "$DIR"/git-api.sh
 
+. "$DIR"/workflow.sh
+
 # Parse Environment Variables
 parse_env
 
@@ -19,7 +21,7 @@ export REPO_FULLNAME=$(jq -r ".repository.full_name" "$GITHUB_EVENT_PATH")
 echo "Collecting information about PR #$PR_NUMBER of $REPO_FULLNAME..."
 
 echo "## Workflow Conclusion"
-echo "$WORKFLOW_CONCLUSION"
+echo "$WORKFLOW_CONCLUSION" # neutral, success, cancelled, timed_out, failure
 
 echo "$GITHUB_EVENT_PATH"
 cat "$GITHUB_EVENT_PATH"
@@ -34,5 +36,11 @@ git config --global user.name "GitHub Play Action"
 action=$(jq --raw-output .action "$GITHUB_EVENT_PATH")
 
 # https://github.com/lots0logs/gh-action-auto-merge/blob/master/entrypoint.sh
+if [ "$action" == "opened" ]; then
+	closeOnFailure
+else
+	echo "action '$action' is not supported"
+	exit 0
+fi
 
-/action/run.pl $action
+#/action/run.pl $action
