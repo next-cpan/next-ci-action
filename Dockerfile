@@ -12,12 +12,15 @@ RUN	apk add --no-cache \
 	perl \
 	jq
 
-# install App::cpm
-RUN curl -fsSL --compressed https://git.io/cpm > cpm && chmod +x
+RUN perl -v
 
+# install App::cpm
 COPY cpanfile /action/
 WORKDIR /action
-RUN cpm -g install --cpanfile=cpanfile
+#RUN curl -fsSL --compressed https://git.io/cpm > cpm && chmod +x cpm
+RUN curl -fsSL --compressed https://raw.githubusercontent.com/skaji/cpm/0.992/cpm > cpm && chmod +x cpm
+RUN ./cpm --version
+RUN ./cpm install -g --show-build-log-on-failure --cpanfile=./cpanfile
 
 COPY /bin /usr/bin/
 
