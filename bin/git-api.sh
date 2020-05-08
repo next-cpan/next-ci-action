@@ -350,6 +350,14 @@ function closePR {
     '
 }
 
+function isPRFromMaintainer {
+    local pr_num
+    pr_num=$1
+
+    ## FIXME
+    echo true
+}
+
 function deleteBranch {
     log "Function deleteBranch"
 

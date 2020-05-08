@@ -8,7 +8,7 @@ LABEL "com.github.actions.color"="blue"
 
 RUN apt-get update && \
         apt-get dist-upgrade -y && \
-        apt-get install -y curl jq
+        apt-get install -y curl jq egrep
 
 RUN perl -v
 

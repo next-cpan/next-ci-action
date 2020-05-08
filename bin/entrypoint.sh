@@ -37,7 +37,7 @@ action=$(jq --raw-output .action "$GITHUB_EVENT_PATH")
 
 # https://github.com/lots0logs/gh-action-auto-merge/blob/master/entrypoint.sh
 if [ "$action" == "opened" ]; then
-	closeOnFailure
+	check_openPullRequest
 else
 	echo "action '$action' is not supported"
 	exit 0
