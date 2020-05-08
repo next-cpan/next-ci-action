@@ -13,7 +13,7 @@ RUN apt-get update && \
 RUN perl -v
 
 # install App::cpm
-COPY cpanfile /action/
+COPY /cpanfile /action/cpanfile
 WORKDIR /action
 #RUN curl -fsSL --compressed https://git.io/cpm > cpm && chmod +x cpm
 #RUN curl -fsSL --compressed https://raw.githubusercontent.com/skaji/cpm/0.992/cpm > cpm && chmod +x cpm
@@ -21,8 +21,8 @@ WORKDIR /action
 #RUN ./cpanm --version
 RUN cpanm --installdeps .
 
-COPY run.pl /action/
-COPY lib /action/lib
+COPY /run.pl /action/run.pl
+COPY /lib /action/lib
 COPY /bin /usr/bin/
 
 ENTRYPOINT ["entrypoint.sh"]
