@@ -7,6 +7,15 @@ use action::std;
 
 use action::cmd::opened ();
 
+=pod
+
+simple shell script to automerge
+
+https://github.com/lots0logs/gh-action-auto-merge/blob/master/entrypoint.sh
+
+
+=cut
+
 sub run(@argv) {
 	die "Need an action" unless scalar @argv;
 
