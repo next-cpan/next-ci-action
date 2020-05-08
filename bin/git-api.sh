@@ -345,7 +345,7 @@ function closePR {
     # https://developer.github.com/v3/pulls/#update-a-pull-request
     curl -X PATCH -s -H "${AUTH_HEADER}" -H "${API_HEADER}" "${URI}/repos/$REPO_FULLNAME/pulls/$pr_num" -d '
     {
-      "state": "closed",
+      "state": "closed"
     }
     '
 }
