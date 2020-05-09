@@ -35,6 +35,7 @@ set -o xtrace
 git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/$REPO_FULLNAME.git
 git config --global user.email "actions@github.com"
 git config --global user.name "GitHub Play Action"
+git fetch origin
 
 action=$(jq --raw-output .action "$GITHUB_EVENT_PATH")
 
