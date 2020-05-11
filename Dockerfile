@@ -10,6 +10,8 @@ RUN    apk add --no-cache \
        ca-certificates \
        curl \
        perl \
+       git \
+       openssh \
        jq
 
 RUN perl -v

@@ -20,10 +20,10 @@ function check_openPullRequest () {
     pr_from_maintainer=$(isPRFromMaintainer "$PR_NUMBER")
 
     if [ "$pr_from_maintainer" == true ]; then
-        addComment $PR_NUMBER "Clean PR from Maintainer merging to p5 branch"
+        addComment $PR_NUMBER "**Clean PR** from Maintainer merging to $TARGET_BRANCH branch"
 
-        git rebase origin/p5
-        git push origin HEAD:p5
+        git rebase origin/$TARGET_BRANCH
+        git push origin HEAD:$TARGET_BRANCH
 
         #git checkout -b origin/p5
         #git merge $HEAD_SHA --no-edit
