@@ -12,7 +12,10 @@ RUN    apk add --no-cache \
        perl \
        git \
        openssh \
-       jq
+       wget \
+       jq \
+       make \
+       gcc
 
 RUN perl -v
 
@@ -21,9 +24,10 @@ COPY /cpanfile /action/cpanfile
 WORKDIR /action
 #RUN curl -fsSL --compressed https://git.io/cpm > cpm && chmod +x cpm
 #RUN curl -fsSL --compressed https://raw.githubusercontent.com/skaji/cpm/0.992/cpm > cpm && chmod +x cpm
-#RUN curl -L https://cpanmin.us/ -o cpanm && chmod +x cpanm
-#RUN ./cpanm --version
-# RUN cpanm --installdeps .
+
+RUN curl -L https://cpanmin.us/ -o cpanm && chmod +x cpanm
+RUN ./cpanm --version
+RUN ./cpanm --installdeps .
 
 COPY /run.pl /action/run.pl
 COPY /lib /action/lib
