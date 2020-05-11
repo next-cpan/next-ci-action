@@ -258,7 +258,7 @@ function triggerCommentBuild {
         "body": "OK to test"
     }'
 
-    log "Build triggered for $pr_num"
+    log "Build triggered for PR $pr_num"
 }
 
 function addComment {
@@ -278,7 +278,7 @@ function addComment {
         \"body\": \"$comment\"
     }"
 
-    log "add comment '$comment' to $pr_num"
+    log "add comment '$comment' to PR $pr_num"
 }
 
 function triggerBuild {
