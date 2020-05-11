@@ -29,13 +29,23 @@ echo "$WORKFLOW_CONCLUSION" # neutral, success, cancelled, timed_out, failure
 echo "$GITHUB_EVENT_PATH"
 cat "$GITHUB_EVENT_PATH"
 
-# setup git repo
+echo "## checking perl version"
+perl -v ||:
+
+echo "## setup git repo"
 git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/$REPO_FULLNAME.git
 git config --global user.email "actions@github.com"
 git config --global user.name "GitHub Play Action"
 git fetch origin
 
+echo "### Current HEAD"
+git log -1
+
+echo "### git log -1 origin/$TARGET_BRANCH"
+git log -1 origin/$TARGET_BRANCH
+
 action=$(jq --raw-output .action "$GITHUB_EVENT_PATH")
+echo "workflow triggered for action=$action"
 
 # https://github.com/lots0logs/gh-action-auto-merge/blob/master/entrypoint.sh
 if [ "$action" == "opened" ]; then
