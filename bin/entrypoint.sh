@@ -48,11 +48,11 @@ action=$(jq --raw-output .action "$GITHUB_EVENT_PATH")
 echo "workflow triggered for action=$action"
 
 # https://github.com/lots0logs/gh-action-auto-merge/blob/master/entrypoint.sh
-if [ "$action" == "opened" ]; then
-	check_openPullRequest
-else
-	echo "action '$action' is not supported"
-	exit 0
-fi
+# if [ "$action" == "opened" ]; then
+# 	check_openPullRequest
+# else
+# 	echo "action '$action' is not supported"
+# 	exit 0
+# fi
 
-#/action/run.pl $action
+/action/run.pl $action
