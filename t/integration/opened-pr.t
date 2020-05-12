@@ -40,7 +40,8 @@ use Cwd ();
         event      => 'create-pr.json',
         test       => sub($out) {
             my $lines = [ split( /\n/, $out->{output} ) ];
-            ok 1;
+            like $out->{output}, qr{\Qmocked Net::GitHub::V3::Issues::query POST /repos/next-cpan/Next-Test-Workflow/issues/12/comments\E}m, "POST a comment";
+
             note explain $out;
         },
     );

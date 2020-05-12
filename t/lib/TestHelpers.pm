@@ -75,6 +75,13 @@ sub test_action(%params) {
 
     my $ctx = context();
 
+    $env->{GITHUB_NAME}  //= 'YourUsername';
+    $env->{GITHUB_TOKEN} //= 'beefbeefbeefbeefbeefbeefbeefbeefbeefbeef';
+
+    $env->{MOCK_NETGITHUB} = 1;
+
+    #$env->{NG_DEBUG} = 1; # NetGitHub
+
     local %ENV = ( WORKFLOW_CONCLUSION => $conclusion, %$env );
 
     my ( $wh, $cfile );
