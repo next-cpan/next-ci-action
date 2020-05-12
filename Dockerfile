@@ -1,3 +1,4 @@
+# TODO: use a pre compiled docker image for speeding up CI workflow
 FROM alpine:latest
 
 LABEL "com.github.actions.name"="Play Pull Request"
@@ -22,8 +23,6 @@ RUN perl -v
 # install App::cpm
 COPY /cpanfile /action/cpanfile
 WORKDIR /action
-#RUN curl -fsSL --compressed https://git.io/cpm > cpm && chmod +x cpm
-#RUN curl -fsSL --compressed https://raw.githubusercontent.com/skaji/cpm/0.992/cpm > cpm && chmod +x cpm
 
 RUN curl -L https://cpanmin.us/ -o cpanm && chmod +x cpanm
 RUN ./cpanm --version
