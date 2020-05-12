@@ -40,7 +40,9 @@ use Cwd ();
         event      => 'create-pr.json',
         test       => sub($out) {
             my $lines = [ split( /\n/, $out->{output} ) ];
+
             like $out->{output}, qr{\Qmocked Net::GitHub::V3::Issues::query POST /repos/next-cpan/Next-Test-Workflow/issues/12/comments\E}m, "POST a comment";
+            like $out->{output}, qr{\Qocked Net::GitHub::V3::PullRequests::query PATCH /repos/next-cpan/Next-Test-Workflow/pulls/12\E}m,     "close the PR";
 
             note explain $out;
         },

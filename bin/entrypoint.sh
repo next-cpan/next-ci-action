@@ -35,7 +35,7 @@ perl -v ||:
 echo "## setup git repo"
 git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/$REPO_FULLNAME.git
 git config --global user.email "actions@github.com"
-git config --global user.name "GitHub Play Action"
+git config --global user.name  "GitHub Play Action"
 git fetch origin
 
 echo "### Current HEAD"

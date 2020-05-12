@@ -8,6 +8,13 @@ use action::GitHub;
 
 use Simple::Accessor qw{gh workflow_conclusion};
 
+sub build ( $self, %options ) {
+
+    # setup ...
+
+    return $self;
+}
+
 sub _build_gh {
     action::GitHub->new;
 }

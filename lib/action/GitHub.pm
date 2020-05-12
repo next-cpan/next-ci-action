@@ -104,7 +104,10 @@ sub _build_repo_full_name($self) {
 }
 
 sub close_pull_request ($self) {
-    $self->pull_request->close( $self->pr_id );
+
+    $self->pull_request->update_pull( $self->pr_id, { "state" => "closed" } );
+
+    return;
 }
 
 # add a comment to the current PR
@@ -120,7 +123,7 @@ sub add_comment ( $self, $comment ) {
     return;
 }
 
-# lives here for integration testing
+# lives here for integration testing: maybe move it to a different location
 sub _mock_netgithub_for_tests {
     no warnings 'redefine';
 
