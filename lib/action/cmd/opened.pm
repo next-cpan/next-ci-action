@@ -3,7 +3,7 @@ package action::cmd::opened;
 use action::std;
 use Test::More;
 
-sub run() {
+sub run($action) {
 
 	say "opened action...";
 
