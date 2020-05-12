@@ -1,18 +1,16 @@
 #!perl
 
 use FindBin;
-use lib $FindBin::Bin . '/lib'; 
+
+use lib $FindBin::Bin . '/lib';
+use lib $FindBin::Bin . '/vendor';
 
 use action::std;
 
 use action::cli;
 
-=pod
+$| = 1;
 
-simple shell script to automerge
+exit( action::cli::start(@ARGV) // 0 ) unless caller;
 
-https://github.com/lots0logs/gh-action-auto-merge/blob/master/entrypoint.sh
-
-=cut
-
-exit(action::cli::start( @ARGV ) // 0) unless caller;
+1;

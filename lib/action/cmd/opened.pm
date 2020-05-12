@@ -5,12 +5,14 @@ use Test::More;
 
 sub run($action) {
 
-	say "opened action...";
+    say "opened action...";
 
-	note "=== ENV";
-	note explain \%ENV;
+    #note "=== ENV";
+    #note explain \%ENV;
 
-	return;
+    say "workflow_conclusion: ", $action->workflow_conclusion;
+
+    return;
 }
 
 1;
