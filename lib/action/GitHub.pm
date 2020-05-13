@@ -91,6 +91,12 @@ sub _build_repo_full_name($self) {
     return $full_name;
 }
 
+sub pull_request_sha($self) {    # _build_ ...
+                                 # pull_request.head.sha
+    my $target = $self->event->{pull_request}->{head}->{sha} or die "Cannot find pull_request.head.sha branch";
+    return $target;
+}
+
 sub _build_target_branch($self) {
 
     # export TARGET_BRANCH=$(jq -r ".pull_request.base.ref" "$GITHUB_EVENT_PATH")
