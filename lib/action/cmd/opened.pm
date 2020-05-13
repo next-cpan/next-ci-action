@@ -20,6 +20,8 @@ sub run($action) {
         $action->rebase_and_merge;
     }
 
+    return 1;    # FIXME to remove - always fail for now so we can restart the workflow
+
     return;
 }
 

@@ -52,16 +52,18 @@ sub rebase_and_merge($self) {
     # ... need a hard reset first
     # pull_request.head.sha
 
-    my $ok = eval {
+    say "pull_request.head.sha ", $self->gh->pull_request_sha
+
+      my $ok = eval {
         say "rebasing branch";
         $out = $self->git->run( 'reset',  '--hard', $self->gh->pull_request_sha );
         $out = $self->git->run( 'rebase', "origin/$target_branch" );
         say "rebase: $out";
         $self->in_rebase();    # abort if we are in middle of a rebase conflict
-    } or do {
+      } or do {
         $self->gh->close_pull_request("fail to rebase branch to $target_branch");
         return;
-    };
+      };
 
     $out = $self->git->run( 'push', "origin", "HEAD:$target_branch" );
     $self->gh->add_comment("**Clean PR** from Maintainer merging to $target_branch branch");
