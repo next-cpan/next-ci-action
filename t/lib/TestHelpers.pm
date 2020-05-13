@@ -17,11 +17,19 @@ use POSIX;
 use Fcntl qw/SEEK_CUR/;
 
 use Cwd 'abs_path';
+use File::pushd;
+use File::Path qw(mkpath rmtree);
+
+use Git::Repository;
+
+use action::Helpers qw{write_file};
 
 use Test2::Harness::Util::IPC qw/run_cmd/;
 
 use Exporter 'import';
 our @EXPORT = qw/test_action/;
+
+my $TMP = File::Temp->newdir();
 
 sub build_cli_cmd {
     state $cache;
@@ -41,6 +49,26 @@ sub build_cli_cmd {
     }
 
     return $cache;
+}
+
+sub init_git_directory {
+
+    my $fake_git_dir = "$TMP/fake_git_dir";
+
+    rmtree($fake_git_dir) if -d $fake_git_dir;
+    mkpath($fake_git_dir) or die;
+
+    Git::Repository->run( init => $fake_git_dir );
+
+    my $git = Git::Repository->new( work_tree => $fake_git_dir );
+
+    write_file( "$fake_git_dir/README", "content" );
+
+    $git->run(qw{config advice.ignoredHook false});
+    $git->run( 'add', 'README' );
+    $git->run( 'commit', '-m', "My First Commit" );
+
+    return $fake_git_dir;
 }
 
 sub test_action(%params) {
@@ -80,9 +108,11 @@ sub test_action(%params) {
 
     $env->{MOCK_HTTP_REQUESTS} //= 1;
 
+    $env->{GIT_WORK_TREE} = init_git_directory();
+
     #$env->{NG_DEBUG} = 1; # NetGitHub
 
-    local %ENV = ( WORKFLOW_CONCLUSION => $conclusion, %$env );
+    local %ENV = ( PATH => $ENV{PATH}, WORKFLOW_CONCLUSION => $conclusion, %$env );
 
     my ( $wh, $cfile );
     if ($capture) {

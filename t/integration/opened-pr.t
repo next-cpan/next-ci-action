@@ -21,11 +21,12 @@ use Cwd ();
         args       => [],
         exit       => 0,
         conclusion => 'success',
+        event      => 'create-pr.json',
         test       => sub($out) {
             my $lines = [ split( /\n/, $out->{output} ) ];
             ok 1;
 
-            #note explain $out;
+            note explain $out;
         },
     );
 }

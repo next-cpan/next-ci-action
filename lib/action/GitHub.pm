@@ -13,6 +13,7 @@ use Simple::Accessor qw{
   ua
   json
 
+  target_branch
   pr_id
 
   event
@@ -88,6 +89,14 @@ sub _build_repo_full_name($self) {
     $self->default_repository($repo);
 
     return $full_name;
+}
+
+sub _build_target_branch($self) {
+
+    # export TARGET_BRANCH=$(jq -r ".pull_request.base.ref" "$GITHUB_EVENT_PATH")
+
+    my $target = $self->event->{pull_request}->{base}->{ref} or die "Cannot find target branch";
+    return $target;
 }
 
 sub close_pull_request ($self) {
