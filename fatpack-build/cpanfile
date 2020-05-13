@@ -1,5 +1,5 @@
 ##
-## run maint/upgrade-fatlib.pl on update
+## on update run ./maint/upgrade-fatlib.pl
 
 requires 'Simple::Accessor' => '1.13';
 requires 'JSON::PP'         => 0;
@@ -9,6 +9,7 @@ requires 'File::pushd'      => 0;
 requires 'File::Which'      => 0;
 requires 'File::Basename'   => 0;
 requires 'Umask::Local'     => 0;
+requires 'Git::Repository'  => 0;
 
 # cannot be used on Alpine
 #requires 'Net::GitHub::V3'  => '1.01';

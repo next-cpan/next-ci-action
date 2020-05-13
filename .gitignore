@@ -1,2 +1,3 @@
 .DS_Store
 fatpack-build/local
+fatlib/B/Hooks/EndOfScope/XS.pm
