@@ -1,4 +1,4 @@
-#!perl
+#!/bin/env perl
 
 use FindBin;
 
