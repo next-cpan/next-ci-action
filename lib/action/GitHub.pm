@@ -99,9 +99,11 @@ sub _build_target_branch($self) {
     return $target;
 }
 
-sub close_pull_request ($self) {
+sub close_pull_request ( $self, $msg = undef ) {
 
     say "Closing Pull Request #", $self->pr_id;
+
+    $self->add_comment($msg) if $msg;
 
     my $uri = sprintf( "/repos/%s/pulls/%s", $self->repo_full_name, $self->pr_id );
     $self->patch( $uri, { "state" => "closed" } );

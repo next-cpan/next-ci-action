@@ -11,8 +11,7 @@ sub run($action) {
     say "workflow_conclusion: ", $conclusion;
 
     if ( !$action->is_success ) {
-        $action->gh->add_comment("**Automatically closing** the Pull Request on failure: workflow conclusion was **$conclusion**");
-        $action->gh->close_pull_request();
+        $action->gh->close_pull_request("**Automatically closing** the Pull Request on failure: workflow conclusion was **$conclusion**");
         return;
     }
 

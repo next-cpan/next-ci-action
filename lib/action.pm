@@ -47,10 +47,21 @@ sub is_maintainer($self) {
 sub rebase_and_merge($self) {
 
     my $target_branch = $self->gh->target_branch;
-    $self->gh->add_comment("**Clean PR** from Maintainer merging to $target_branch branch");
 
-    my $out = $self->git->run( 'log', '-n2' );
-    say "## rebase_and_merge: ", $out;
+    my $out;
+
+    my $ok = eval {
+        say "rebasing branch";
+        $out = $self->git->run( 'rebase', "origin/$target_branch" );
+        say "rebase: $out";
+        1;
+    } or do {
+        $self->gh->close_pull_request("fail to rebase branch to $target_branch");
+        return;
+    };
+
+    $out = $self->git->run( 'push', "origin", "HEAD:$target_branch" );
+    $self->gh->add_comment("**Clean PR** from Maintainer merging to $target_branch branch");
 
     return;
 }
