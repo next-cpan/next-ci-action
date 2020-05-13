@@ -45,7 +45,6 @@ sub is_maintainer($self) {
 }
 
 sub rebase_and_merge($self) {
-
     my $target_branch = $self->gh->target_branch;
 
     my $out;
@@ -54,7 +53,7 @@ sub rebase_and_merge($self) {
         say "rebasing branch";
         $out = $self->git->run( 'rebase', "origin/$target_branch" );
         say "rebase: $out";
-        1;
+        $self->in_rebase();    # abort if we are in middle of a rebase conflict
     } or do {
         $self->gh->close_pull_request("fail to rebase branch to $target_branch");
         return;
@@ -62,6 +61,17 @@ sub rebase_and_merge($self) {
 
     $out = $self->git->run( 'push', "origin", "HEAD:$target_branch" );
     $self->gh->add_comment("**Clean PR** from Maintainer merging to $target_branch branch");
+
+    return;
+}
+
+sub in_rebase($self) {
+
+    my $rebase_merge = $self->git->run(qw{rev-parse --git-path rebase-merge});
+    return 1 if $rebase_merge && -d $rebase_merge;
+
+    my $rebase_apply = $self->git->run(qw{rev-parse --git-path rebase-merge});
+    return 1 if $rebase_apply && -d $rebase_apply;
 
     return;
 }
