@@ -33,6 +33,8 @@ echo "## checking perl version"
 perl -v ||:
 
 echo "## setup git repo"
+export GIT_WORK_TREE=$PWD
+echo "GIT_WORK_TREE: $GIT_WORK_TREE"
 git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/$REPO_FULLNAME.git
 git config --global user.email "actions@github.com"
 git config --global user.name  "GitHub Play Action"
