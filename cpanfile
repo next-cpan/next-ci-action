@@ -13,7 +13,8 @@ requires 'File::Which'      => 0;
 requires 'File::Basename'   => 0;
 requires 'Umask::Local'     => 0;
 
-requires 'Net::GitHub::V3'  => '1.01';
+# cannot be used on Alpine
+#requires 'Net::GitHub::V3'  => '1.01';
 
 on test => sub {
 	requires 'Test::More';
