@@ -21,16 +21,18 @@ RUN    apk add --no-cache \
 RUN perl -v
 
 # install App::cpm
-COPY /cpanfile /action/cpanfile
+#COPY /cpanfile /action/cpanfile
+
 WORKDIR /action
 
-RUN curl -L https://cpanmin.us/ -o cpanm && chmod +x cpanm
-RUN ./cpanm --version
-RUN ./cpanm --installdeps .
+#RUN curl -L https://cpanmin.us/ -o cpanm && chmod +x cpanm
+#RUN ./cpanm --version
+#RUN ./cpanm --installdeps .
 
 COPY /run.pl /action/run.pl
-COPY /lib /action/lib
+COPY /bin    /usr/bin/
+COPY /fatlib /action/fatlib
+COPY /lib    /action/lib
 COPY /vendor /action/vendor
-COPY /bin /usr/bin/
 
 ENTRYPOINT ["entrypoint.sh"]
