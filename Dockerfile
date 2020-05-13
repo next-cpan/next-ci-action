@@ -30,6 +30,7 @@ RUN ./cpanm --installdeps .
 
 COPY /run.pl /action/run.pl
 COPY /lib /action/lib
+COPY /vendor /action/vendor
 COPY /bin /usr/bin/
 
 ENTRYPOINT ["entrypoint.sh"]
