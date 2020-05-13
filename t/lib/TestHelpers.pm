@@ -78,7 +78,7 @@ sub test_action(%params) {
     $env->{GITHUB_NAME}  //= 'YourUsername';
     $env->{GITHUB_TOKEN} //= 'beefbeefbeefbeefbeefbeefbeefbeefbeefbeef';
 
-    $env->{MOCK_NETGITHUB} = 1;
+    $env->{MOCK_HTTP_REQUESTS} //= 1;
 
     #$env->{NG_DEBUG} = 1; # NetGitHub
 
