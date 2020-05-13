@@ -1,24 +1,24 @@
 # TODO: use a pre compiled docker image for speeding up CI workflow
-FROM perldocker/perl-tester:5.30
+FROM alpine:latest
 
 LABEL "com.github.actions.name"="Play Pull Request"
 LABEL "com.github.actions.description"="Automatically Check Pull Requests"
 LABEL "com.github.actions.icon"="check-square"
 LABEL "com.github.actions.color"="blue"
 
-RUN apt-get update && \
-        apt-get dist-upgrade -y && \
-        apt-get install -y \
-              curl \
-              jq \
-              bash \
-              wget \
-              jq \
-              make \
-              gcc
+RUN    apk add --no-cache \
+       bash \
+       ca-certificates \
+       curl \
+       perl \
+       git \
+       openssh \
+       wget \
+       jq \
+       make \
+       gcc
 
 RUN perl -v
-RUN perl -MDevel::Peek -E 'say q[ok]'
 
 # install App::cpm
 COPY /cpanfile /action/cpanfile
