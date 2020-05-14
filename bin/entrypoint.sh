@@ -84,14 +84,19 @@ git checkout -b pr_${PR_NUMBER} fork/$HEAD_BRANCH
 set -e +x
 
 echo ::group::git log
+
+echo "### git status"
+git status
+
 echo "### git log HEAD"
-git log --pretty=oneline --abbrev-commit -10
+git log --pretty=oneline --abbrev-commit -5
+
+echo "### git log fork/$HEAD_BRANCH"
+git log --pretty=oneline --abbrev-commit -5 fork/$HEAD_BRANCH
 
 echo "### git log origin/$TARGET_BRANCH"
 git log --pretty=oneline --abbrev-commit -5 origin/$TARGET_BRANCH 
 
-echo "### git status"
-git status
 echo ::endgroup::
 
 set -e -x
