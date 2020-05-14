@@ -6,8 +6,6 @@ use action::std;
 
 use action;
 
-use action::cmd::opened;
-
 use Simple::Accessor qw{action};
 
 sub _build_action($self) {
@@ -19,6 +17,11 @@ sub run ( $self, @argv ) {
 
     my $action = $argv[0];
 
+    $action =~ m{^[a-z]+$} or die "invalid action";
+
+    my $pkg = "action::cmd::$action";
+
+    eval qq[require $pkg];    # lazy load the action
     my $run = "action::cmd::$action"->can('run');
     die "unknown action '$action'" unless $run;
 
