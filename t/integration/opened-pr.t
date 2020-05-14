@@ -17,12 +17,12 @@ use Cwd ();
 {
     note "opened PR - success";
     test_action(
-        action     => 'opened',
-        args       => [],
-        exit       => 0,
-        conclusion => 'success',
-        event      => 'create-pr.json',
-        test       => sub($out) {
+        action             => 'opened',
+        args               => [],
+        exit               => 0,
+        conclusion         => 'success',
+        pull_request_state => 'open.json',
+        test               => sub($out) {
             my $lines = [ split( /\n/, $out->{output} ) ];
             ok 1;
 
@@ -34,16 +34,16 @@ use Cwd ();
 {
     note "opened PR - failure";
     test_action(
-        action     => 'opened',
-        args       => [],
-        exit       => 0,
-        conclusion => 'failure',
-        event      => 'create-pr.json',
-        test       => sub($out) {
+        action             => 'opened',
+        args               => [],
+        exit               => 0,
+        conclusion         => 'failure',
+        pull_request_state => 'open.json',
+        test               => sub($out) {
             my $lines = [ split( /\n/, $out->{output} ) ];
 
-            like $out->{output}, qr{\Qmocked POST /repos/next-cpan/Next-Test-Workflow/issues/12/comments\E}m, "POST a comment";
-            like $out->{output}, qr{\Qmocked PATCH /repos/next-cpan/Next-Test-Workflow/pulls/12\E}m,          "close the PR";
+            like $out->{output}, qr{\Qmocked POST /repos/next-cpan/Next-Test-Workflow/issues/19/comments\E}m, "POST a comment";
+            like $out->{output}, qr{\Qmocked PATCH /repos/next-cpan/Next-Test-Workflow/pulls/19\E}m,          "close the PR";
 
             note explain $out;
         },

@@ -85,6 +85,7 @@ sub test_action(%params) {
 
     my $env = delete $params{env} // {};
 
+    # GITHUB_EVENT_PATH
     my $event = delete $params{event};
     if ($event) {
         my $path = $FindBin::Bin;
@@ -93,6 +94,17 @@ sub test_action(%params) {
         die "Cannot find event $event" unless -e $path;
 
         $env->{GITHUB_EVENT_PATH} = $path;
+    }
+
+    # PR_STATE_PATH
+    my $pull_request_state = delete $params{pull_request_state};
+    if ($pull_request_state) {
+        my $path = $FindBin::Bin;
+        $path =~ s{/t/.+$}{} or die;    # root
+        $path .= "/t/fixtures/pr/$pull_request_state";
+        die "Cannot find event $pull_request_state" unless -e $path;
+
+        $env->{PR_STATE_PATH} = $path;
     }
 
     unshift @$args, $action;

@@ -10,6 +10,9 @@ use Simple::Accessor qw{
   github_token
   github_event_path
 
+  pull_request_state_path
+  pull_request_state
+
   ua
   json
 
@@ -60,29 +63,38 @@ sub _build_github_token {
     $ENV{GITHUB_TOKEN} or die "GITHUB_TOKEN unset";
 }
 
-sub _build_github_event_path {
-    my $f = $ENV{GITHUB_EVENT_PATH} or die "GITHUB_EVENT_PATH unset";
-    die "github_event_path does not exist" unless -e $f;
-    return $f;
-}
-
 sub _build_json($self) {
     return JSON::PP->new->utf8->relaxed->allow_nonref;
 }
 
-sub _build_event($self) {
-    return $self->json->decode( read_file( $self->github_event_path ) );
+# we should avoid using the github event and use pull_request_state instead
+# sub _build_github_event_path {
+#     my $f = $ENV{GITHUB_EVENT_PATH} or die "GITHUB_EVENT_PATH unset";
+#     die "github_event_path does not exist" unless -e $f;
+#     return $f;
+# }
+
+# sub _build_event($self) {
+#     return $self->json->decode( read_file( $self->github_event_path ) );
+# }
+
+sub _build_pull_request_state($self) {
+    return $self->json->decode( read_file( $self->pull_request_state_path ) );
+}
+
+sub _build_pull_request_state_path {
+    my $f = $ENV{PR_STATE_PATH} or die "PR_STATE_PATH unset";
+    die "pull_request_state_path does not exist" unless -e $f && -s _;
+    return $f;
 }
 
 sub _build_pr_id ($self) {
-
-    # $(jq -r ".number" "$GITHUB_EVENT_PATH")
-    my $id = $self->event->{number} or die "Cannot find PR id";
+    my $id = $self->pull_request_state->{number} or die "Cannot find PR number";
     return $id;
 }
 
 sub _build_repo_full_name($self) {
-    my $full_name = $self->event->{pull_request}->{head}->{repo}->{full_name} or die "Cannot find repo full_name";
+    my $full_name = $self->pull_request_state->{head}->{repo}->{full_name} or die "Cannot find repo full_name";
 
     my ( $org, $repo ) = split( '/', $full_name );
     $self->default_org($org);
@@ -93,15 +105,12 @@ sub _build_repo_full_name($self) {
 
 sub pull_request_sha($self) {    # _build_ ...
                                  # pull_request.head.sha
-    my $target = $self->event->{pull_request}->{head}->{sha} or die "Cannot find pull_request.head.sha branch";
+    my $target = $self->pull_request_state->{head}->{sha} or die "Cannot find pull_request.head.sha branch";
     return $target;
 }
 
 sub _build_target_branch($self) {
-
-    # export TARGET_BRANCH=$(jq -r ".pull_request.base.ref" "$GITHUB_EVENT_PATH")
-
-    my $target = $self->event->{pull_request}->{base}->{ref} or die "Cannot find target branch";
+    my $target = $self->pull_request_state->{base}->{ref} or die "Cannot find target branch";
     return $target;
 }
 
