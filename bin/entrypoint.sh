@@ -103,12 +103,9 @@ echo ::endgroup::
 
 set -e -x
 
-echo "## REBASE"
-git rebase origin/$TARGET_BRANCH
+# echo "## REBASE"
+# git rebase origin/$TARGET_BRANCH
 #git push --force-with-lease fork $HEAD_BRANCH
-
-echo "STOP STOP STOP"
-false
 
 # https://github.com/cirrus-actions/rebase/blob/master/entrypoint.sh
 # https://github.com/lots0logs/gh-action-auto-merge/blob/master/entrypoint.sh
