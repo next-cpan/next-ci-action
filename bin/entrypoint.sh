@@ -78,7 +78,7 @@ git fetch origin $TARGET_BRANCH
 git fetch fork   $HEAD_BRANCH
 
 # make sure we are on the branch
-git checkout -b $HEAD_BRANCH fork/$HEAD_BRANCH
+git checkout -b work_on_${HEAD_BRANCH} fork/$HEAD_BRANCH
 
 # https://github.com/cirrus-actions/rebase/blob/master/entrypoint.sh
 
