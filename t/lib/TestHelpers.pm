@@ -85,17 +85,6 @@ sub test_action(%params) {
 
     my $env = delete $params{env} // {};
 
-    # GITHUB_EVENT_PATH
-    my $event = delete $params{event};
-    if ($event) {
-        my $path = $FindBin::Bin;
-        $path =~ s{/t/.+$}{} or die;    # root
-        $path .= "/t/fixtures/events/$event";
-        die "Cannot find event $event" unless -e $path;
-
-        $env->{GITHUB_EVENT_PATH} = $path;
-    }
-
     # PR_STATE_PATH
     my $pull_request_state = delete $params{pull_request_state};
     if ($pull_request_state) {

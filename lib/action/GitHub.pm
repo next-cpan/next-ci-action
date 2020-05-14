@@ -8,7 +8,6 @@ use HTTP::Tinyish ();
 use Simple::Accessor qw{
   github_user
   github_token
-  github_event_path
 
   pull_request_state_path
   pull_request_state
@@ -19,7 +18,6 @@ use Simple::Accessor qw{
   target_branch
   pr_id
 
-  event
   default_org
   default_repository
 
@@ -66,17 +64,6 @@ sub _build_github_token {
 sub _build_json($self) {
     return JSON::PP->new->utf8->relaxed->allow_nonref;
 }
-
-# we should avoid using the github event and use pull_request_state instead
-# sub _build_github_event_path {
-#     my $f = $ENV{GITHUB_EVENT_PATH} or die "GITHUB_EVENT_PATH unset";
-#     die "github_event_path does not exist" unless -e $f;
-#     return $f;
-# }
-
-# sub _build_event($self) {
-#     return $self->json->decode( read_file( $self->github_event_path ) );
-# }
 
 sub _build_pull_request_state($self) {
     return $self->json->decode( read_file( $self->pull_request_state_path ) );
