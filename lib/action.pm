@@ -63,7 +63,7 @@ sub rebase_and_merge($self) {
         say "rebasing branch";
         $out = $self->git->run( 'rebase', "origin/$target_branch" );
         say "rebase: $out";
-        $self->in_rebase();    # abort if we are in middle of a rebase conflict
+        $self->in_rebase() ? 0 : 1;    # abort if we are in middle of a rebase conflict
     } or do {
         $self->gh->close_pull_request("fail to rebase branch to $target_branch");
         return;
