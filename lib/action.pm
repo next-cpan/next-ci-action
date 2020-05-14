@@ -8,6 +8,8 @@ use action::GitHub;
 
 use Git::Repository;
 
+use Test::More;
+
 use Simple::Accessor qw{
   gh
   git
@@ -56,7 +58,11 @@ sub rebase_and_merge($self) {
 
     my $ok = eval {
         say "rebasing branch";
-        $out = $self->git->run( 'reset',  '--hard', $self->gh->pull_request_sha );
+        $out = $self->git->run( 'reset', '--hard', $self->gh->pull_request_sha );
+
+        note "git log -1: ", explain [ $self->git->run( 'log', '-1' ) ];
+        note "git status: ", explain [ $self->git->run('status') ];
+
         $out = $self->git->run( 'rebase', "origin/$target_branch" );
         say "rebase: $out";
         $self->in_rebase();    # abort if we are in middle of a rebase conflict
@@ -79,7 +85,7 @@ sub in_rebase($self) {
     my $rebase_apply = $self->git->run(qw{rev-parse --git-path rebase-merge});
     return 1 if $rebase_apply && -d $rebase_apply;
 
-    return;
+    return 0;
 }
 
 1;
