@@ -52,7 +52,7 @@ echo "# HEAD_REPO:         $HEAD_REPO"
 echo "# HEAD_BRANCH:       $HEAD_BRANCH"
 echo "# GIT_WORK_TREE:     $GIT_WORK_TREE"
 echo "# Conclusion:        $WORKFLOW_CONCLUSION" # neutral, success, cancelled, timed_out, failure
-echo "# Perl Version:      " $(perl -E 'say $]')
+echo "# Perl Version:     " $(perl -E 'say $]')
 echo "###############################################################"
 
 echo ::group::PR_STATE_PATH
