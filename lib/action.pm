@@ -60,8 +60,8 @@ sub rebase_and_merge($self) {
         say "rebasing branch";
         $out = $self->git->run( 'reset', '--hard', $self->gh->pull_request_sha );
 
-        note "git log -1: ", explain [ $self->git->run( 'log', '-1' ) ];
-        note "git status: ", explain [ $self->git->run('status') ];
+        note "git log -10: ", explain [ $self->git->run( 'log', '-10' ) ];
+        note "git status: ",  explain [ $self->git->run('status') ];
 
         $out = $self->git->run( 'rebase', "origin/$target_branch" );
         say "rebase: $out";
