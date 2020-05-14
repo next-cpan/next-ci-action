@@ -94,6 +94,8 @@ sub is_maintainer($self) {
 
         my $answer = $self->gh->get($uri) // {};
 
+        note "memberships: $uri => ", explain $answer;
+
         if ( $answer->{status} && $answer->{status} == 200 ) {
             say "Author $author is a member of team $team";
             return 1;
