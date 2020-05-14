@@ -73,6 +73,8 @@ sub rebase_and_merge($self) {
     $ok &= $? == 0;
     $self->gh->add_comment("**Clean PR** from Maintainer merging to $target_branch branch");
 
+    say "rebase_and_merge OK ?? ", $ok;
+
     return $ok;
 }
 

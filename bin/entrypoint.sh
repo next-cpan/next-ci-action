@@ -113,3 +113,5 @@ set -e -x
 # https://github.com/lots0logs/gh-action-auto-merge/blob/master/entrypoint.sh
 
 /action/run.pl $action
+
+echo "=== END ==="
