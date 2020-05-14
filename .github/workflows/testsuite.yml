@@ -31,6 +31,6 @@ jobs:
           args: "--with-develop"
           sudo: false
       - name: t/*.t
-        run: prove -Ilib -v t/*.t
+        run: prove -Ilib -Ifatlib -v t/*.t
       - name: t/integration/*.t
-        run: prove -Ilib -v t/integration/*.t
+        run: prove -Ilib -Ifatlib -v t/integration/*.t
