@@ -6,10 +6,28 @@ use strict;
 use warnings;
 use Test::More;
 
-plan tests => 2;
+my @modules;
 
-use_ok('action')      || print "Bail out!\n";
-use_ok('action::cli') || print "Bail out!\n";
+BEGIN {
+    my @pms = qx{find lib -iname '*.pm'};
+
+    foreach my $pm (@pms) {
+        chomp $pm;
+        $pm =~ s{^lib/}{};
+        $pm =~ s{/}{::}g;
+        $pm =~ s{\.pm$}{};
+
+        push @modules, $pm;
+    }
+}
+
+plan tests => scalar @modules + 1;
+
+ok scalar @modules, "testing some modules";
+
+foreach my $m (@modules) {
+    use_ok($m) or diag "Cannot load $m";
+}
 
 diag("Testing action Perl $], $^X");
 
