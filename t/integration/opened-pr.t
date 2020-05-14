@@ -19,14 +19,13 @@ use Cwd ();
     test_action(
         action             => 'opened',
         args               => [],
-        exit               => 0,
+        exit               => 256,
         conclusion         => 'success',
         pull_request_state => 'open.json',
         test               => sub($out) {
             my $lines = [ split( /\n/, $out->{output} ) ];
-            ok 1;
-
-            note explain $out;
+            like $out->{output}, qr{fail to rebase branch}
+              or note explain $out;
         },
     );
 }

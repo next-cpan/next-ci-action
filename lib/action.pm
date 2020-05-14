@@ -10,11 +10,24 @@ use Git::Repository;
 
 use Test::More;
 
+use File::pushd;
+
 use Simple::Accessor qw{
+
   gh
   git
+
+  git_work_tree
+
   workflow_conclusion
 };
+
+use action::Helpers qw{read_file read_file_no_comments};
+
+use constant MAINTAINERS_FILE          => q[.next/maintainers];
+use constant DEFAULT_MAINTENANCE_TEAMS => qw{p5-bulk p5-admins};
+
+use constant DEFAULT_ORG => q[next-cpan];
 
 sub build ( $self, %options ) {
 
@@ -28,9 +41,12 @@ sub _build_gh {
     action::GitHub->new;
 }
 
-sub _build_git {
-    $ENV{GIT_WORK_TREE} or die q[GIT_WORK_TREE is unset];
-    return Git::Repository->new( work_tree => $ENV{GIT_WORK_TREE} );
+sub _build_git($self) {
+    return Git::Repository->new( work_tree => $self->git_work_tree );
+}
+
+sub _build_git_work_tree {
+    return ( $ENV{GIT_WORK_TREE} or die q[GIT_WORK_TREE is unset] );
 }
 
 sub _build_workflow_conclusion {
@@ -43,7 +59,44 @@ sub is_success($self) {
 
 # check if the action is coming from a maintainer
 sub is_maintainer($self) {
-    1;    # FIXME
+    my $author = $self->gh->pull_request_author or die;
+
+    # make sure we are in the git work tree
+    my $cd = pushd( $self->git_work_tree ) or die;
+
+    # default teams which can submit patches
+    my @check_team_memberships = ( +DEFAULT_MAINTENANCE_TEAMS );
+
+    if ( -e MAINTAINERS_FILE ) {
+        say "# maintainers file found ", MAINTAINERS_FILE;
+        my $autorized_rules = read_file_no_comments(MAINTAINERS_FILE);
+        foreach my $rule (@$autorized_rules) {
+            return 1 if $author eq $rule;
+            if ( $rule =~ m{^teams/([a-z0-9_]+)} ) {
+                push @check_team_memberships, $1;
+            }
+        }
+    }
+
+    # checking next-cpan teams
+    foreach my $team (@check_team_memberships) {
+
+        # GET /orgs/next-cpan/teams/maintainers/memberships/atoomic
+        my $uri = sprintf(
+            '/orgs/%s/teams/%s/memberships/%s',
+            +DEFAULT_ORG,
+            $team,
+            $author
+        );
+
+        my $answer = $self->gh->get($uri) // {};
+        if ( $answer->{status} && $answer->{status} == 200 ) {
+            say "Author $author is a member of team $team";
+            return 1;
+        }
+    }
+
+    return;
 }
 
 sub rebase_and_merge($self) {

@@ -89,7 +89,7 @@ sub test_action(%params) {
     my $pull_request_state = delete $params{pull_request_state};
     if ($pull_request_state) {
         my $path = $FindBin::Bin;
-        $path =~ s{/t/.+$}{} or die;    # root
+        $path =~ s{/t(/.+)?$}{} or die $path;    # root
         $path .= "/t/fixtures/pr/$pull_request_state";
         die "Cannot find event $pull_request_state" unless -e $path;
 

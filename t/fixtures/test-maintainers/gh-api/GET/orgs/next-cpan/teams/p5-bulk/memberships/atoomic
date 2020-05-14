@@ -1,0 +1,6 @@
+Status: 200 OK
+{
+  "url": "https://api.github.com/teams/1/memberships/octocat",
+  "role": "member",
+  "state": "active"
+}

@@ -61,7 +61,7 @@ sub _build_github_token {
     $ENV{GITHUB_TOKEN} or die "GITHUB_TOKEN unset";
 }
 
-sub _build_json($self) {
+sub _build_json {
     return JSON::PP->new->utf8->relaxed->allow_nonref;
 }
 
@@ -94,6 +94,12 @@ sub pull_request_sha($self) {    # _build_ ...
                                  # pull_request.head.sha
     my $target = $self->pull_request_state->{head}->{sha} or die "Cannot find pull_request.head.sha branch";
     return $target;
+}
+
+sub pull_request_author($self) {    # build.. ?
+
+    my $author = $self->pull_request_state->{user}->{login} or die "Cannot find PR author: user.login";
+    return $author;
 }
 
 sub _build_target_branch($self) {
@@ -129,6 +135,13 @@ sub add_comment ( $self, $comment ) {
 
 # ===== basic methods to post to GitHub
 
+sub get ( $self, $uri ) {
+
+    return $self->ua->get(
+        BASE_API_URL . $uri,
+    );
+}
+
 sub post ( $self, $uri, $content ) {
 
     return $self->ua->post(
@@ -163,7 +176,7 @@ sub _build_headers($self) {
     };
 }
 
-# lives here for integration testing: maybe move it to a different location
+# FIXME move it to a different location for testing only
 sub _mock_http_for_tests {
     no warnings 'redefine';
 
@@ -179,14 +192,45 @@ sub _mock_http_for_tests {
 
         my $MET = uc $method;
 
-        *$sub = sub ( $self, $url, $data ) {
+        *$sub = sub ( $self, $url, $data = undef ) {
             my $dump = '';
             ($dump) = explain $data if $data;
 
             my ( undef, undef, undef, $uri ) = split( '/', $url, 4 );
 
-            print STDERR "# mocked $MET /$uri $dump";
-            return 1;
+            print STDERR "# mocked $MET /$uri $dump\n";
+
+            # by default all requests succeeds
+            my $answer = {
+                protocol => 'HTTP/1.1',
+                reason   => 'OK',
+                status   => 200,
+                success  => 1,
+                url      => $url,
+                content  => '',
+            };
+
+            if ( -d $ENV{MOCK_HTTP_REQUESTS} ) {
+                my $f = $ENV{MOCK_HTTP_REQUESTS} . "/gh-api/$MET/$uri";
+                if ( -e $f ) {
+                    my $content = read_file($f);
+                    my ( $header, $content ) = split( /\n/, $content, 2 );
+                    if ( $header =~ m{^Status:\s+(\d+)\s+(.+)}i ) {
+                        $answer->{status} = $1;
+                        $answer->{reason} = $2;
+                    }
+
+                    state $json = _build_json();
+                    $answer->{content} = eval { $self->json->decode($content) } // $content;
+                }
+                else {
+                    # when requesting an unknown path from a known directory trigger an error
+                    $answer->{status} = 404;
+                    $answer->{reason} = 'No Content to Serve';
+                }
+            }
+
+            return $answer;
         };
     }
 
