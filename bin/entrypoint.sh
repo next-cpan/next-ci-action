@@ -32,12 +32,14 @@ curl -X GET -s -H "${AUTH_HEADER}" -H "${API_HEADER}" \
           -o $PR_STATE_PATH
 
 echo "## Setting variables"
+# values from PR_STATE_PATH
 export TARGET_BRANCH=$(jq -r ".base.ref" "$PR_STATE_PATH")
 export HEAD_SHA=$(jq -r ".head.sha" "$PR_STATE_PATH")
 export HEAD_REPO=$(jq -r .head.repo.full_name "$PR_STATE_PATH")
 export HEAD_BRANCH=$(jq -r .head.ref "$PR_STATE_PATH")
 export GIT_WORK_TREE=$PWD
 
+# values from GITHUB_EVENT_PATH
 action=$(jq --raw-output .action "$GITHUB_EVENT_PATH")
 
 echo "###############################################################"

@@ -56,25 +56,20 @@ sub rebase_and_merge($self) {
 
     say "pull_request.head.sha ", $self->gh->pull_request_sha;
 
+    ### FIXME: we can improve this part with a for loop to retry
+    ###		   when dealing with multiple requests
+
     my $ok = eval {
         say "rebasing branch";
-        $out = $self->git->run( 'reset', '--hard', $self->gh->pull_request_sha );
-
-        note "git log -10: ", explain [ $self->git->run( 'log', '-10' ) ];
-        note "git status: ",  explain [ $self->git->run('status') ];
-
         $out = $self->git->run( 'rebase', "origin/$target_branch" );
         say "rebase: $out";
-
-        note "git am --show-current-patch: ", explain [ $self->git->run(qw{am --show-current-patch}) ];
-
         $self->in_rebase();    # abort if we are in middle of a rebase conflict
     } or do {
         $self->gh->close_pull_request("fail to rebase branch to $target_branch");
         return;
     };
 
-    $out = $self->git->run( 'push', "origin", "HEAD:$target_branch" );
+    $out = $self->git->run( 'push', '--force-with-lease', "origin", "HEAD:$target_branch" );
     $self->gh->add_comment("**Clean PR** from Maintainer merging to $target_branch branch");
 
     return;
