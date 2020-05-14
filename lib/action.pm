@@ -70,9 +70,10 @@ sub rebase_and_merge($self) {
     };
 
     $out = $self->git->run( 'push', '--force-with-lease', "origin", "HEAD:$target_branch" );
+    $ok &= $? == 0;
     $self->gh->add_comment("**Clean PR** from Maintainer merging to $target_branch branch");
 
-    return;
+    return $ok;
 }
 
 sub in_rebase($self) {

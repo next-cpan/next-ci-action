@@ -17,9 +17,10 @@ sub run($action) {
 
     # action is a success
     if ( $action->is_maintainer ) {
-        $action->rebase_and_merge;
+        return $action->rebase_and_merge;
     }
     else {
+        # request review from maintainers
         ...;
     }
 
