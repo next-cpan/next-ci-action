@@ -76,7 +76,7 @@ git remote add       fork https://x-access-token:$COMMITTER_TOKEN@github.com/$HE
 
 # rename TARGET_BRANCH -> BASE_BRANCH
 git fetch origin $TARGET_BRANCH
-git fetch fork   $HEAD_BRANCH
+git fetch fork --depth=0  $HEAD_BRANCH
 
 # make sure we are on the branch
 git checkout -b pr_${PR_NUMBER} fork/$HEAD_BRANCH
@@ -109,18 +109,6 @@ echo "STOP STOP STOP"
 false
 
 # https://github.com/cirrus-actions/rebase/blob/master/entrypoint.sh
-
-##
-## colors
-# echo [Warning] single
-# echo [Error] single
-
 # https://github.com/lots0logs/gh-action-auto-merge/blob/master/entrypoint.sh
-# if [ "$action" == "opened" ]; then
-# 	check_openPullRequest
-# else
-# 	echo "action '$action' is not supported"
-# 	exit 0
-# fi
 
 /action/run.pl $action
