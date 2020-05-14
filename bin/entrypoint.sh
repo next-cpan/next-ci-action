@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e -xo pipefail
+set -e
 
 # import variables and functions
 DIR=/usr/bin
@@ -15,7 +15,9 @@ echo ::endgroup::
 
 # Parse Environment Variables
 echo ::group::parse_env
+echo "============================================="
 parse_env
+echo "============================================="
 echo ::endgroup::
 
 export PR_NUMBER=$(jq -r ".number" "$GITHUB_EVENT_PATH")
@@ -29,6 +31,9 @@ curl -X GET -s -H "${AUTH_HEADER}" -H "${API_HEADER}" \
           "${URI}/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
           -o $PR_STATE_PATH
 
+# disable -x
+set -e +x
+
 echo "## Setting some variables"
 export TARGET_BRANCH=$(jq -r ".base.ref" "$PR_STATE_PATH")
 export HEAD_SHA=$(jq -r ".head.sha" "$PR_STATE_PATH")
@@ -36,8 +41,7 @@ export HEAD_REPO=$(jq -r .head.repo.full_name "$PR_STATE_PATH")
 export HEAD_BRANCH=$(jq -r .head.ref "$PR_STATE_PATH")
 export GIT_WORK_TREE=$PWD
 
-set -e +x
-
+echo "###############################################################"
 echo "# GITHUB_REPOSITORY: $GITHUB_REPOSITORY"
 echo "# TARGET_BRANCH:     $TARGET_BRANCH"
 echo "# HEAD_SHA:          $HEAD_SHA"
@@ -45,22 +49,22 @@ echo "# HEAD_REPO:         $HEAD_REPO"
 echo "# HEAD_BRANCH:       $HEAD_BRANCH"
 echo "# GIT_WORK_TREE:     $GIT_WORK_TREE"
 echo "# Workflow Conclusion: $WORKFLOW_CONCLUSION" # neutral, success, cancelled, timed_out, failure
+echo "# Perl Version:    " $(perl -E 'say $]')
+echo "###############################################################"
 
+echo ::group::PR_STATE_PATH
 echo "PR_STATE_PATH: $PR_STATE_PATH"
 echo "============================================="
-echo ::group::PR_STATE_PATH
 cat $PR_STATE_PATH
-echo ::endgroup::
 echo "============================================="
+echo ::endgroup::
 
+echo ::group::GITHUB_EVENT_PATH
 echo "GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH"
 echo "============================================="
-echo ::group::GITHUB_EVENT_PATH
 cat "$GITHUB_EVENT_PATH"
-echo ::endgroup::
 echo "============================================="
-
-echo "# Perl Version: " $(perl -E 'say $]')
+echo ::endgroup::
 
 set -e -xo pipefail
 
@@ -86,6 +90,11 @@ git log -1 origin/$TARGET_BRANCH
 
 action=$(jq --raw-output .action "$GITHUB_EVENT_PATH")
 echo "workflow triggered for action=$action"
+
+##
+## colors
+# echo [Warning] single
+# echo [Error] single
 
 # https://github.com/lots0logs/gh-action-auto-merge/blob/master/entrypoint.sh
 # if [ "$action" == "opened" ]; then
