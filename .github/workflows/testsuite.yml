@@ -1,0 +1,36 @@
+name: 'testsuite'
+
+on:
+  push:
+    branches:
+      - "*"
+    tags-ignore:
+      - "*"
+  pull_request:
+
+jobs:
+  perl_tester:
+    runs-on: ubuntu-latest
+    name: "perl v${{ matrix.perl-version }}"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        perl-version:
+          - "5.30"
+
+    container:
+      image: perldocker/perl-tester:${{ matrix.perl-version }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: uses install-with-cpanm
+        uses: perl-actions/install-with-cpanm@v1.1
+        with:
+          cpanfile: "cpanfile"
+          args: "--with-develop"
+          sudo: false
+      - name: t/*.t
+        run: prove -Ilib -v t/*.t
+      - name: t/integration/*.t
+        run: prove -Ilib -v t/integration/*.t
