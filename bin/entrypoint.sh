@@ -26,7 +26,7 @@ export PR_NUMBER=$(jq -r ".number" "$GITHUB_EVENT_PATH")
 echo "## Collecting information about Pull Request #${PR_NUMBER}"
 
 # allow us to handle multiple events: we just need the PR number
-export PR_STATE_PATH=/tmp/pr_state.${PR_NUMBER}.json
+export PR_STATE_PATH=${HOME}/pr_state.${PR_NUMBER}.json
 curl -X GET -s -H "${AUTH_HEADER}" -H "${API_HEADER}" \
           "${URI}/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
           -o $PR_STATE_PATH
@@ -41,7 +41,10 @@ export HEAD_REPO=$(jq -r .head.repo.full_name "$PR_STATE_PATH")
 export HEAD_BRANCH=$(jq -r .head.ref "$PR_STATE_PATH")
 export GIT_WORK_TREE=$PWD
 
+action=$(jq --raw-output .action "$GITHUB_EVENT_PATH")
+
 echo "###############################################################"
+echo "# Workflow Action:   $action"
 echo "# GITHUB_REPOSITORY: $GITHUB_REPOSITORY"
 echo "# TARGET_BRANCH:     $TARGET_BRANCH"
 echo "# HEAD_SHA:          $HEAD_SHA"
@@ -74,22 +77,29 @@ git config --global user.name  "GitHub Play Action"
 git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git
 git remote add       fork https://x-access-token:$COMMITTER_TOKEN@github.com/$HEAD_REPO.git
 
+# rename TARGET_BRANCH -> BASE_BRANCH
 git fetch origin $TARGET_BRANCH
 git fetch fork   $HEAD_BRANCH
 
 # make sure we are on the branch
 git checkout -b work_on_${HEAD_BRANCH} fork/$HEAD_BRANCH
 
-# https://github.com/cirrus-actions/rebase/blob/master/entrypoint.sh
-
+echo ::group::git log
 echo "### Current HEAD"
 git log -1
 
 echo "### git log -1 origin/$TARGET_BRANCH"
 git log -1 origin/$TARGET_BRANCH
+echo ::endgroup::
 
-action=$(jq --raw-output .action "$GITHUB_EVENT_PATH")
-echo "workflow triggered for action=$action"
+echo "## REBASE"
+git rebase origin/$TARGET_BRANCH
+#git push --force-with-lease fork $HEAD_BRANCH
+
+echo "STOP STOP STOP"
+false
+
+# https://github.com/cirrus-actions/rebase/blob/master/entrypoint.sh
 
 ##
 ## colors
