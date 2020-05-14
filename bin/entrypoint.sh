@@ -6,20 +6,24 @@ set -e -xo pipefail
 DIR=/usr/bin
 
 # Don't alter the import order
+echo ::group::source files
 . "$DIR"/global-variables.sh
 . "$DIR"/util-methods.sh
 . "$DIR"/git-api.sh
-
 #. "$DIR"/workflow.sh
+echo ::endgroup::
 
 # Parse Environment Variables
+echo ::group::parse_env
 parse_env
+echo ::endgroup::
 
 export PR_NUMBER=$(jq -r ".number" "$GITHUB_EVENT_PATH")
 #export REPO_FULLNAME=$(jq -r ".repository.full_name" "$GITHUB_EVENT_PATH")
 
 echo "## Collecting information about Pull Request #${PR_NUMBER}"
 
+# allow us to handle multiple events: we just need the PR number
 export PR_STATE_PATH=/tmp/pr_state.${PR_NUMBER}.json
 curl -X GET -s -H "${AUTH_HEADER}" -H "${API_HEADER}" \
           "${URI}/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
@@ -30,31 +34,35 @@ export TARGET_BRANCH=$(jq -r ".base.ref" "$PR_STATE_PATH")
 export HEAD_SHA=$(jq -r ".head.sha" "$PR_STATE_PATH")
 export HEAD_REPO=$(jq -r .head.repo.full_name "$PR_STATE_PATH")
 export HEAD_BRANCH=$(jq -r .head.ref "$PR_STATE_PATH")
+export GIT_WORK_TREE=$PWD
 
-echo "GITHUB_REPOSITORY: $GITHUB_REPOSITORY"
-echo "TARGET_BRANCH:     $TARGET_BRANCH"
-echo "HEAD_SHA:          $HEAD_SHA"
-echo "HEAD_REPO:         $HEAD_REPO"
-echo "HEAD_BRANCH:       $HEAD_BRANCH"
+set -e +x
 
-echo "## Workflow Conclusion"
-echo "$WORKFLOW_CONCLUSION" # neutral, success, cancelled, timed_out, failure
+echo "# GITHUB_REPOSITORY: $GITHUB_REPOSITORY"
+echo "# TARGET_BRANCH:     $TARGET_BRANCH"
+echo "# HEAD_SHA:          $HEAD_SHA"
+echo "# HEAD_REPO:         $HEAD_REPO"
+echo "# HEAD_BRANCH:       $HEAD_BRANCH"
+echo "# GIT_WORK_TREE:     $GIT_WORK_TREE"
+echo "# Workflow Conclusion: $WORKFLOW_CONCLUSION" # neutral, success, cancelled, timed_out, failure
 
 echo "PR_STATE_PATH: $PR_STATE_PATH"
 echo "============================================="
+echo ::group::PR_STATE_PATH
 cat $PR_STATE_PATH
+echo ::endgroup::
 echo "============================================="
 
 echo "GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH"
 echo "============================================="
+echo ::group::GITHUB_EVENT_PATH
 cat "$GITHUB_EVENT_PATH"
+echo ::endgroup::
 echo "============================================="
 
 echo "# Perl Version: " $(perl -E 'say $]')
 
-echo "## setup git repo"
-export GIT_WORK_TREE=$PWD
-echo "GIT_WORK_TREE: $GIT_WORK_TREE"
+set -e -xo pipefail
 
 git config --global user.email "actions@github.com"
 git config --global user.name  "GitHub Play Action"
