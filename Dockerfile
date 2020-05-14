@@ -10,13 +10,14 @@ RUN    apk add --no-cache \
        bash \
        ca-certificates \
        curl \
-       perl \
        git \
-       openssh \
-       wget \
+       git-lfs \
        jq \
-       make \
-       gcc
+       openssh \
+       perl \
+       wget
+#       make \
+#       gcc
 
 RUN perl -v
 

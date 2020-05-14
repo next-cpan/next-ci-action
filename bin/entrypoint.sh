@@ -51,8 +51,8 @@ echo "# HEAD_SHA:          $HEAD_SHA"
 echo "# HEAD_REPO:         $HEAD_REPO"
 echo "# HEAD_BRANCH:       $HEAD_BRANCH"
 echo "# GIT_WORK_TREE:     $GIT_WORK_TREE"
-echo "# Workflow Conclusion: $WORKFLOW_CONCLUSION" # neutral, success, cancelled, timed_out, failure
-echo "# Perl Version:    " $(perl -E 'say $]')
+echo "# Conclusion:        $WORKFLOW_CONCLUSION" # neutral, success, cancelled, timed_out, failure
+echo "# Perl Version:      " $(perl -E 'say $]')
 echo "###############################################################"
 
 echo ::group::PR_STATE_PATH
@@ -82,7 +82,9 @@ git fetch origin $TARGET_BRANCH
 git fetch fork   $HEAD_BRANCH
 
 # make sure we are on the branch
-git checkout -b work_on_${HEAD_BRANCH} fork/$HEAD_BRANCH
+git checkout -b pr_${PR_NUMBER} fork/$HEAD_BRANCH
+
+set -e +x
 
 echo ::group::git log
 echo "### Current HEAD"
@@ -91,6 +93,8 @@ git log -1
 echo "### git log -1 origin/$TARGET_BRANCH"
 git log -1 origin/$TARGET_BRANCH
 echo ::endgroup::
+
+set -e -x
 
 echo "## REBASE"
 git rebase origin/$TARGET_BRANCH
