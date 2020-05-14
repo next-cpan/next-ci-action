@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -e +x
 
 # import variables and functions
 DIR=/usr/bin
@@ -15,15 +15,15 @@ echo ::endgroup::
 
 # Parse Environment Variables
 echo ::group::parse_env
-echo "============================================="
 parse_env
-echo "============================================="
 echo ::endgroup::
 
 export PR_NUMBER=$(jq -r ".number" "$GITHUB_EVENT_PATH")
 #export REPO_FULLNAME=$(jq -r ".repository.full_name" "$GITHUB_EVENT_PATH")
 
+echo "###############################################################"
 echo "## Collecting information about Pull Request #${PR_NUMBER}"
+echo "###############################################################"
 
 # allow us to handle multiple events: we just need the PR number
 export PR_STATE_PATH=${HOME}/pr_state.${PR_NUMBER}.json
@@ -31,10 +31,7 @@ curl -X GET -s -H "${AUTH_HEADER}" -H "${API_HEADER}" \
           "${URI}/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
           -o $PR_STATE_PATH
 
-# disable -x
-set -e +x
-
-echo "## Setting some variables"
+echo "## Setting variables"
 export TARGET_BRANCH=$(jq -r ".base.ref" "$PR_STATE_PATH")
 export HEAD_SHA=$(jq -r ".head.sha" "$PR_STATE_PATH")
 export HEAD_REPO=$(jq -r .head.repo.full_name "$PR_STATE_PATH")
@@ -87,11 +84,14 @@ git checkout -b pr_${PR_NUMBER} fork/$HEAD_BRANCH
 set -e +x
 
 echo ::group::git log
-echo "### Current HEAD"
-git log -1
+echo "### git log HEAD"
+git log --pretty=oneline --abbrev-commit -10
 
-echo "### git log -1 origin/$TARGET_BRANCH"
-git log -1 origin/$TARGET_BRANCH
+echo "### git log origin/$TARGET_BRANCH"
+git log --pretty=oneline --abbrev-commit -5 origin/$TARGET_BRANCH 
+
+echo "### git status"
+git status
 echo ::endgroup::
 
 set -e -x
