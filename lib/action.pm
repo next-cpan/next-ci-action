@@ -67,6 +67,8 @@ sub is_maintainer($self) {
     # default teams which can submit patches
     my @check_team_memberships = ( +DEFAULT_MAINTENANCE_TEAMS );
 
+    # FIXME make sure the user is known in the maintainers group
+
     if ( -e MAINTAINERS_FILE ) {
         say "# maintainers file found ", MAINTAINERS_FILE;
         my $autorized_rules = read_file_no_comments(MAINTAINERS_FILE);
@@ -81,6 +83,7 @@ sub is_maintainer($self) {
     # checking next-cpan teams
     foreach my $team (@check_team_memberships) {
 
+        # https://developer.github.com/v3/teams/members/#get-team-membership
         # GET /orgs/next-cpan/teams/maintainers/memberships/atoomic
         my $uri = sprintf(
             '/orgs/%s/teams/%s/memberships/%s',
@@ -90,6 +93,7 @@ sub is_maintainer($self) {
         );
 
         my $answer = $self->gh->get($uri) // {};
+
         if ( $answer->{status} && $answer->{status} == 200 ) {
             say "Author $author is a member of team $team";
             return 1;

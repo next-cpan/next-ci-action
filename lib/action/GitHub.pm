@@ -139,6 +139,9 @@ sub get ( $self, $uri ) {
 
     return $self->ua->get(
         BASE_API_URL . $uri,
+        {
+            headers => $self->headers,
+        }
     );
 }
 
