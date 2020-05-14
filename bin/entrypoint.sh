@@ -76,14 +76,16 @@ git remote add       fork https://x-access-token:$COMMITTER_TOKEN@github.com/$HE
 
 # rename TARGET_BRANCH -> BASE_BRANCH
 git fetch origin $TARGET_BRANCH
-git fetch fork --depth=0  $HEAD_BRANCH
+git fetch fork   $HEAD_BRANCH
 
 # make sure we are on the branch
 git checkout -b pr_${PR_NUMBER} fork/$HEAD_BRANCH
+# download the entire commit history as the original clone is done with --depth 1
+git pull --unshallow 
 
 set -e +x
 
-echo ::group::git log
+echo ::group::git status + log
 
 echo "### git status"
 git status
