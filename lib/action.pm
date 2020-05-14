@@ -66,7 +66,7 @@ sub rebase_and_merge($self) {
         $out = $self->git->run( 'rebase', "origin/$target_branch" );
         say "rebase: $out";
 
-        note "git am --show-current-patch: ", explain [ $self->git->run(qw{git am --show-current-patch}) ];
+        note "git am --show-current-patch: ", explain [ $self->git->run(qw{am --show-current-patch}) ];
 
         $self->in_rebase();    # abort if we are in middle of a rebase conflict
     } or do {
