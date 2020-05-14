@@ -71,7 +71,24 @@ sub init_git_directory {
     return $fake_git_dir;
 }
 
+sub _setup_once {
+    state $run_once = 0;
+
+    return if $run_once;
+
+    if ( $ENV{AUTOMATED_TESTING} ) {
+        qx{git config --global user.email "you\@example.com"};
+        qx{git config --global user.name "Your Name"};
+    }
+
+    $run_once = 1;
+
+    return 1;
+}
+
 sub test_action(%params) {
+
+    _setup_once();
 
     my $action     = delete $params{action} or die;
     my $args       = delete $params{args} // [];
