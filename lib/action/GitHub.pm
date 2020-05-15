@@ -135,6 +135,29 @@ sub add_comment ( $self, $comment ) {
 
 # ===== basic methods to post to GitHub
 
+sub get_as_bot ( $self, $uri ) {
+
+    if ( !$ENV{BOT_ACCESS_TOKEN} ) {
+
+        # FIXME setup the admin group here
+        ### ... could consider posting a comment to a repo which automatically setup the TOKEN for us
+        ### view https://github.com/marketplace/actions/slash-command-dispatch
+        ### /need-token $REPO $PR
+        $self->add_comment("WARNING: missing BOT_ACCESS_TOKEN in the repository. Please contact an \@admin-group");
+        die "missing BOT_ACCESS_TOKEN";
+    }
+
+    # custom headers just for this request
+    my $headers = $self->_build_headers( $ENV{BOT_ACCESS_TOKEN} );
+
+    return $self->ua->get(
+        BASE_API_URL . $uri,
+        {
+            headers => $headers,
+        }
+    );
+}
+
 sub get ( $self, $uri ) {
 
     return $self->ua->get(
@@ -172,9 +195,12 @@ sub encode_content ( $self, $content ) {
     return $self->json->encode($content);
 }
 
-sub _build_headers($self) {
+sub _build_headers ( $self, $token = undef ) {
+
+    # by default use the github token unless we request a different one
+    $token //= $self->github_token;
     return {
-        "Authorization" => "token " . $self->github_token,      # AUTH_HEADER
+        "Authorization" => "token $token",                      # AUTH_HEADER
         "Accept"        => "application/vnd.github.v3+json",    # API_HEADER
     };
 }

@@ -26,6 +26,7 @@ my $open_pr = q[t/fixtures/pr/open.json];
 
 $ENV{MOCK_HTTP_REQUESTS} = $FindBin::Bin . q[/fixtures/test-maintainers];
 $ENV{PR_STATE_PATH}      = $open_pr;
+$ENV{BOT_ACCESS_TOKEN}   = 'fakebotaccesstoken';
 
 {
     my $action = action->new( git => 'FAKE', git_work_tree => $tmp );
@@ -105,6 +106,22 @@ EOS
     is $action->gh->pull_request_author, 'notlisted', 'PR author = notlisted';
 
     ok !$action->is_maintainer(), 'notlisted is not a maintainer';
+}
+
+{
+    note "posting a comment when BOT_ACCESS_TOKEN is missing";
+    local %ENV = %ENV;
+    delete $ENV{BOT_ACCESS_TOKEN};
+    $ENV{PR_STATE_PATH} = $open_pr;
+
+    my $action = action->new( git => 'FAKE', git_work_tree => $tmp );
+    is $action->gh->pull_request_author, 'atoomic', 'PR author = atoomic';
+
+    like(
+        dies { $action->is_maintainer() },
+        qr/missing BOT_ACCESS_TOKEN/m,
+        "comment and die when BOT_ACCESS_TOKEN is missing"
+    );
 }
 
 done_testing;

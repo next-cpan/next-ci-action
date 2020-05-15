@@ -80,6 +80,7 @@ sub is_maintainer($self) {
         }
     }
 
+    ### need a token to use this request
     # checking next-cpan teams
     foreach my $team (@check_team_memberships) {
 
@@ -92,7 +93,9 @@ sub is_maintainer($self) {
             $author
         );
 
-        my $answer = $self->gh->get($uri) // {};
+        # we need a special permission to check team memberships
+        # 		"message":"Resource not accessible by integration"
+        my $answer = $self->gh->get_as_bot($uri) // {};
 
         note "memberships: $uri => ", explain $answer;
 
