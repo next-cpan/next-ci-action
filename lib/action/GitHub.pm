@@ -31,6 +31,7 @@ use JSON::PP ();
 use Test::More;
 
 use constant BASE_API_URL => q[https://api.github.com];
+use constant DEFAULT_ORG  => q[next-cpan];
 
 sub build ( $self, %options ) {
 
@@ -133,6 +134,31 @@ sub add_comment ( $self, $comment ) {
     return;
 }
 
+sub is_user_team_member ( $self, $user, $team, $org = +DEFAULT_ORG ) {
+
+    # https://developer.github.com/v3/teams/members/#get-team-membership
+    # GET /orgs/next-cpan/teams/maintainers/memberships/atoomic
+    my $uri = sprintf(
+        '/orgs/%s/teams/%s/memberships/%s',
+        $org,
+        $team,
+        $user
+    );
+
+    # we need a special permission to check team memberships
+    #       "message":"Resource not accessible by integration"
+    my $answer = $self->get_as_bot($uri) // {};
+
+    note "is_user_team_member: $uri => ", explain $answer;
+
+    if ( $answer->{status} && $answer->{status} == 200 ) {
+        say "User $user is a member of team $org/$team";
+        return 1;
+    }
+
+    return;
+}
+
 # ===== basic methods to post to GitHub
 
 sub get_as_bot ( $self, $uri ) {
@@ -142,8 +168,8 @@ sub get_as_bot ( $self, $uri ) {
         # FIXME setup the admin group here
         ### ... could consider posting a comment to a repo which automatically setup the TOKEN for us
         ### view https://github.com/marketplace/actions/slash-command-dispatch
-        ### /need-token $REPO $PR
-        $self->add_comment("WARNING: missing BOT_ACCESS_TOKEN in the repository. Please contact an \@admin-group");
+        ### /need-token $REPO $PR JOB_ID
+        $self->add_comment("**WARNING:** missing BOT_ACCESS_TOKEN in the repository. Please contact an \@admin-group");
         die "missing BOT_ACCESS_TOKEN";
     }
 

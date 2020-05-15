@@ -26,8 +26,7 @@ use action::Helpers qw{read_file read_file_no_comments};
 
 use constant MAINTAINERS_FILE          => q[.next/maintainers];
 use constant DEFAULT_MAINTENANCE_TEAMS => qw{p5-bulk p5-admins};
-
-use constant DEFAULT_ORG => q[next-cpan];
+use constant MAINTENANCE_TEAM          => q[maintainers];
 
 sub build ( $self, %options ) {
 
@@ -69,6 +68,17 @@ sub is_maintainer($self) {
 
     # FIXME make sure the user is known in the maintainers group
 
+    if ( !$self->gh->is_user_team_member( $author, +MAINTENANCE_TEAM ) ) {
+
+        #$self->close_pull_request( );
+        # FIXME idea... maybe perform a request to add the user to maintenance...
+        # could not perform the final merge
+        $self->gh->add_comment("user \@$author is not listed in maintenance team please request...");
+
+        # we should abort ..,
+        #return;
+    }
+
     if ( -e MAINTAINERS_FILE ) {
         say "# maintainers file found ", MAINTAINERS_FILE;
         my $autorized_rules = read_file_no_comments(MAINTAINERS_FILE);
@@ -83,26 +93,7 @@ sub is_maintainer($self) {
     ### need a token to use this request
     # checking next-cpan teams
     foreach my $team (@check_team_memberships) {
-
-        # https://developer.github.com/v3/teams/members/#get-team-membership
-        # GET /orgs/next-cpan/teams/maintainers/memberships/atoomic
-        my $uri = sprintf(
-            '/orgs/%s/teams/%s/memberships/%s',
-            +DEFAULT_ORG,
-            $team,
-            $author
-        );
-
-        # we need a special permission to check team memberships
-        # 		"message":"Resource not accessible by integration"
-        my $answer = $self->gh->get_as_bot($uri) // {};
-
-        note "memberships: $uri => ", explain $answer;
-
-        if ( $answer->{status} && $answer->{status} == 200 ) {
-            say "Author $author is a member of team $team";
-            return 1;
-        }
+        return 1 if $self->gh->is_user_team_member( $author, $team );
     }
 
     return;
@@ -127,15 +118,13 @@ sub rebase_and_merge($self) {
         say "rebase: $out";
         $self->in_rebase() ? 0 : 1;    # abort if we are in middle of a rebase conflict
     } or do {
-        $self->gh->close_pull_request("fail to rebase branch to $target_branch");
+        $self->gh->close_pull_request("fail to rebase branch to ${target_branch}. Please fix and resubmit.");
         return;
     };
 
     $out = $self->git->run( 'push', '--force-with-lease', "origin", "HEAD:$target_branch" );
     $ok &= $? == 0;
     $self->gh->add_comment("**Clean PR** from Maintainer merging to $target_branch branch");
-
-    say "rebase_and_merge OK ?? ", $ok;
 
     return $ok;
 }
