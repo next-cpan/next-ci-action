@@ -1,0 +1,42 @@
+Status: 200 OK
+[
+  {
+    '_links' => {
+      'html' => {
+        'href' => 'https://github.com/next-cpan/Next-Test-Workflow/pull/16#pullrequestreview-413815757'
+      },
+      'pull_request' => {
+        'href' => 'https://api.github.com/repos/next-cpan/Next-Test-Workflow/pulls/16'
+      }
+    },
+    'author_association' => 'MEMBER',
+    'body' => '',
+    'commit_id' => 'e89eba88ebca2dbb55f150ffe5fde82cea34452b',
+    'html_url' => 'https://github.com/next-cpan/Next-Test-Workflow/pull/16#pullrequestreview-413815757',
+    'id' => 413815757,
+    'node_id' => 'MDE3OlB1bGxSZXF1ZXN0UmV2aWV3NDEzODE1NzU3',
+    'pull_request_url' => 'https://api.github.com/repos/next-cpan/Next-Test-Workflow/pulls/16',
+    'state' => 'APPROVED',
+    'submitted_at' => '2020-05-18T17:55:05Z',
+    'user' => {
+      'avatar_url' => 'https://avatars3.githubusercontent.com/u/65556988?u=3a9efe25dba859259765f40116b3d0845ed317d3&v=4',
+      'events_url' => 'https://api.github.com/users/nextcpan/events{/privacy}',
+      'followers_url' => 'https://api.github.com/users/nextcpan/followers',
+      'following_url' => 'https://api.github.com/users/nextcpan/following{/other_user}',
+      'gists_url' => 'https://api.github.com/users/nextcpan/gists{/gist_id}',
+      'gravatar_id' => '',
+      'html_url' => 'https://github.com/nextcpan',
+      'id' => 65556988,
+      'login' => 'nextcpan',
+      'node_id' => 'MDQ6VXNlcjY1NTU2OTg4',
+      'organizations_url' => 'https://api.github.com/users/nextcpan/orgs',
+      'received_events_url' => 'https://api.github.com/users/nextcpan/received_events',
+      'repos_url' => 'https://api.github.com/users/nextcpan/repos',
+      'site_admin' => bless( do{\(my $o = 0)}, 'JSON::PP::Boolean' ),
+      'starred_url' => 'https://api.github.com/users/nextcpan/starred{/owner}{/repo}',
+      'subscriptions_url' => 'https://api.github.com/users/nextcpan/subscriptions',
+      'type' => 'User',
+      'url' => 'https://api.github.com/users/nextcpan'
+    }
+  }
+]

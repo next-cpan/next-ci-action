@@ -141,11 +141,11 @@ sub is_user_team_member ( $self, $user, $team, $org = +DEFAULT_ORG ) {
     my $uri = sprintf(
         '/orgs/%s/teams/%s/memberships/%s',
         $org,
-        $team,
+        $team,    # need to be visible
         $user
     );
 
-    # we need a special permission to check team memberships
+    # we need a special permission to check team memberships PAT
     #       "message":"Resource not accessible by integration"
     my $answer = $self->get_as_bot($uri) // {};
 

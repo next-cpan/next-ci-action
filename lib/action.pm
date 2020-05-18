@@ -57,7 +57,7 @@ sub is_success($self) {
 }
 
 # check if the action is coming from a maintainer
-sub is_maintainer($self) {
+sub is_maintainer($self) {    # FIXME is_repo_maintainer
     my $author = $self->gh->pull_request_author or die;
 
     # make sure we are in the git work tree
