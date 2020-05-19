@@ -4,32 +4,64 @@ package action::cli;
 
 use action::std;
 
+use Getopt::Long qw(:config no_auto_abbrev no_ignore_case bundling);
+
 use action;
 
-use Simple::Accessor qw{action};
+use Simple::Accessor qw{action stage};
 
 sub _build_action($self) {
     main::action->new;
 }
 
-sub run ( $self, @argv ) {
-    die "Need an action" unless scalar @argv;
+sub run ( $self, @args ) {
+    return usage() unless scalar @args;
 
-    my $action = $argv[0];
+    my $help;
+    my $opts = Getopt::Long::GetOptionsFromArray(
+        \@args,
+        'help'     => \$help,
+        'stage=s'  => \( $self->{stage} ),
+        'action=s' => \( $self->{action} ),
+    ) or return usage(1);
 
-    $action =~ m{^[a-z]+$} or die "invalid action";
+    return usage() if $help;
 
-    my $pkg = "action::cmd::$action";
+    my $stage = $self->stage;
 
-    eval qq[require $pkg];    # lazy load the action
-    my $run = "action::cmd::$action"->can('run');
-    die "unknown action '$action'" unless $run;
+    if ( !defined $stage ) {
+        say "Undefined stage: use --stage";
+        return usage(1);
+    }
+
+    $stage =~ m{^[a-z_]+$} or die "invalid stage";
+
+    my $pkg = "action::cmd::$stage";
+
+    eval qq[require $pkg; 1] or warn $@;    # lazy load the action
+    my $run = "action::cmd::$stage"->can('run');
+    die "unknown stage '$stage'" unless $run;
 
     return $run->( $self->action );
 }
 
 sub start( @argv ) {
     return __PACKAGE__->new()->run(@argv);
+}
+
+sub usage( $exit_code=0 ) {
+    my $fh = $exit_code ? \*STDERR : \*STDOUT;
+
+    print {$fh} <<'EOS';
+./run.pl --stage STAGE --action ACTION
+
+Sample usages:
+    ./run.pl --stage check_ci --action opened
+    ./run.pl --stage lint     --action opened
+    ./run.pl --stage cron_stale
+EOS
+
+    return $exit_code;
 }
 
 1;

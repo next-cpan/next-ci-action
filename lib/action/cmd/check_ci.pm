@@ -1,11 +1,11 @@
-package action::cmd::opened;
+package action::cmd::check_ci;
 
 use action::std;
 use Test::More;
 
 sub run($action) {
 
-    say "# opened action...";
+    say "# check_ci:";
 
     my $conclusion = $action->workflow_conclusion;
     say "workflow_conclusion: ", $conclusion;
@@ -14,13 +14,6 @@ sub run($action) {
         $action->gh->close_pull_request("**Automatically closing** the Pull Request on failure: workflow conclusion was **$conclusion**");
         return;
     }
-
-    # GET /orgs/:org/teams/:team_slug/memberships/:username
-
-    ### .. idea merge_if_maintainer
-    ##
-
-    ## ... create a PR
 
     # action is a success
     if ( $action->is_maintainer ) {    # FIXME is_repo_maintainer

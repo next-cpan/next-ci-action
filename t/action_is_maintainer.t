@@ -26,7 +26,8 @@ my $open_pr = q[t/fixtures/pr/open.json];
 
 $ENV{MOCK_HTTP_REQUESTS} = $FindBin::Bin . q[/fixtures/test-maintainers];
 $ENV{PR_STATE_PATH}      = $open_pr;
-$ENV{BOT_ACCESS_TOKEN}   = 'fakebotaccesstoken';
+$ENV{BOT_ACCESS_TOKEN}   = 'fake-bot-access-token';
+$ENV{GITHUB_TOKEN}       = 'fake-github-token';
 
 {
     my $action = action->new( git => 'FAKE', git_work_tree => $tmp );

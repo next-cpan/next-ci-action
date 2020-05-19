@@ -17,8 +17,22 @@ use Cwd ();
 {
     note "opened PR - success";
     test_action(
-        action             => 'opened',
-        args               => [],
+        args               => [qw{--help}],
+        exit               => 0,
+        conclusion         => 'success',
+        pull_request_state => 'open.json',
+        test               => sub($out) {
+            my $lines = [ split( /\n/, $out->{output} ) ];
+            like $out->{output}, qr{Sample usage}
+              or note explain $out;
+        },
+    );
+}
+
+{
+    note "opened PR - success";
+    test_action(
+        args               => [qw{--stage check_ci}],
         exit               => 256,
         conclusion         => 'success',
         pull_request_state => 'open.json',
@@ -33,8 +47,7 @@ use Cwd ();
 {
     note "opened PR - failure";
     test_action(
-        action             => 'opened',
-        args               => [],
+        args               => [qw{--stage check_ci}],
         exit               => 0,
         conclusion         => 'failure',
         pull_request_state => 'open.json',

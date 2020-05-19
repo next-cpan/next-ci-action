@@ -4,9 +4,8 @@ set -e +x
 
 # input arguments
 
-echo "before: $INPUT_STAGE"
-INPUT_STAGE="$1"
-echo "after: $INPUT_STAGE"
+# setting it is not really needed
+#INPUT_STAGE="$1"
 if [ "x$INPUT_STAGE" == "x" ]; then
 	echo "[Error] INPUT_STAGE is not set";
 	set
@@ -130,4 +129,4 @@ set -e -x
 
 /action/run.pl --stage $INPUT_STAGE --action $action
 
-echo "=== END ==="
+echo "=== Next CI Action DONE ==="

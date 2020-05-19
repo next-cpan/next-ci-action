@@ -90,8 +90,7 @@ sub test_action(%params) {
 
     _setup_once();
 
-    my $action     = delete $params{action} or die;
-    my $args       = delete $params{args} // [];
+    my $args       = delete $params{args}       // [];
     my $conclusion = delete $params{conclusion} // 'success';
 
     my $subtest  = delete $params{test} // delete $params{tests} // delete $params{subtest};
@@ -113,16 +112,15 @@ sub test_action(%params) {
         $env->{PR_STATE_PATH} = $path;
     }
 
-    unshift @$args, $action;
-
     if ( keys %params ) {
         croak "Unexpected parameters: " . join( ', ', sort keys %params );
     }
 
     my $ctx = context();
 
-    $env->{GITHUB_NAME}  //= 'YourUsername';
-    $env->{GITHUB_TOKEN} //= 'beefbeefbeefbeefbeefbeefbeefbeefbeefbeef';
+    $env->{GITHUB_NAME}      //= 'YourUsername';
+    $env->{GITHUB_TOKEN}     //= 'beefbeefbeefbeefbeefbeefbeefbeefbeefbeef';
+    $env->{BOT_ACCESS_TOKEN} //= 'beefbeefbeefbeefbeefbeefbeefbeefbeefbeef';
 
     $env->{MOCK_HTTP_REQUESTS} //= 1;
 
@@ -217,8 +215,6 @@ sub test_action(%params) {
     $ctx->release;
 
     return $out;
-
-    #return action::cli::start( $action, @$args );
 }
 
 1;
