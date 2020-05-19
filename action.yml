@@ -1,5 +1,10 @@
-name: "Merge pull requests"
+catname: "Next CPAN CI workflow"
 description: "Automatically check & merge pull requests"
+author: "atoomic"
+inputs:
+  stage:
+    description: 'Main action to run'
+    required: true
 runs:
   using: "docker"
   image: "Dockerfile"

@@ -21,14 +21,20 @@ echo ::endgroup::
 export PR_NUMBER=$(jq -r ".pull_request.number" "$GITHUB_EVENT_PATH")
 
 echo ::group::GITHUB_EVENT_PATH
-echo "GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH"
+echo "[Warning] GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH"
 echo "============================================="
 cat "$GITHUB_EVENT_PATH"
 echo "============================================="
 echo ::endgroup::
 
+if [ "x$INPUT_STAGE" == "x" ]; then
+	echo "[Error] INPUT_STAGE is not set";
+	set
+	exit 1
+fi
+
 if [ "$PR_NUMBER" == "null" ]; then
-	echo "Cannot find Pull Request number from GitHub event!"
+	echo "[Error] Cannot find Pull Request number from GitHub event!"
 	exit 1
 fi
 
@@ -45,7 +51,7 @@ curl -X GET -s -H "${AUTH_HEADER}" -H "${API_HEADER}" \
           -o $PR_STATE_PATH
 
 echo ::group::PR_STATE_PATH
-echo "PR_STATE_PATH: $PR_STATE_PATH"
+echo "[Warning] PR_STATE_PATH: $PR_STATE_PATH"
 echo "============================================="
 cat $PR_STATE_PATH
 echo "============================================="
@@ -121,6 +127,6 @@ set -e -x
 # pull_request.review.state: approved
 # "event_name": "pull_request_review",
 
-/action/run.pl $action
+/action/run.pl --stage $INPUT_STAGE --action $action
 
 echo "=== END ==="
