@@ -11,6 +11,7 @@ requires 'HTTP::Tinyish'    => '0.16'; # patch >= 0.16
 requires 'JSON::PP'         => 0;
 requires 'Simple::Accessor' => '1.13';
 requires 'Umask::Local'     => 0;
+requires 'YAML::PP'          => '0.022';
 
 # cannot be used on Alpine
 #requires 'Net::GitHub::V3'  => '1.01';

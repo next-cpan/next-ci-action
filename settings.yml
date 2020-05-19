@@ -1,0 +1,13 @@
+
+github:
+  org: 'next-cpan'
+  monitor: 'next-monitor'
+
+maintainers:
+  default_teams:
+    - "p5-bulk"
+    - "p5-admins"
+
+pull_requests:
+  # how many days before an issue is automatically merged in
+  stale_timeout: 7
