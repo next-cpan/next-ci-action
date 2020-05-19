@@ -5,6 +5,9 @@ inputs:
   stage:
     description: 'Main action to run'
     required: true
+  conclusion:
+    description: 'conclusion of the previous jobs: neutral, success, cancelled, timed_out, failure'
+    required: false
 runs:
   using: "docker"
   image: "Dockerfile"
