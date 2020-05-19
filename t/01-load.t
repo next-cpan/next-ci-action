@@ -2,6 +2,9 @@
 
 use 5.010000;
 
+use FindBin;
+use lib $FindBin::Bin . '/../fatlib';
+
 use strict;
 use warnings;
 use Test::More;

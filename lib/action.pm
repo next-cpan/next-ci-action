@@ -1,10 +1,9 @@
-#!perl
-
 package action;
 
 use action::std;
 
 use action::GitHub;
+use action::Settings;
 
 use Git::Repository;
 
