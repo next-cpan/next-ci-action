@@ -9,7 +9,7 @@ github:
   monitor_repo: 'next-monitor'
 
 maintainers:
-  file: ./next/maintainers
+  file: .next/maintainers
   team: maintainers
   default_maintenance_teams:
     - "p5-bulk"

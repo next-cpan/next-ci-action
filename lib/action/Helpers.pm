@@ -3,6 +3,7 @@ package action::Helpers;
 use action::std;    # import strict, warnings & features
 
 use Exporter 'import';
+use Cwd ();
 
 our @EXPORT    = qw(read_file write_file);
 our @EXPORT_OK = ( @EXPORT, qw{read_json_file write_json_file read_file_no_comments} );
@@ -11,14 +12,14 @@ sub read_file ( $file, $mode = ':utf8' ) {
     local $/;
 
     open( my $fh, '<' . $mode, $file )
-      or die "Fail to open file: $! " . join( ' ', ( caller(1) )[ 0, 1, 2, 3 ] ) . "\n";
+      or die "Fail to open file '$file': $! " . join( ' ', ( caller(1) )[ 0, 1, 2, 3 ] ) . "\n";
 
     return readline($fh);
 }
 
 sub write_file ( $file, $content, $mode = ':utf8' ) {
     open( my $fh, '>' . $mode, $file )
-      or die "Fail to open file: '$file' $! " . join( ' ', ( caller(1) )[ 0, 1, 2, 3 ] ) . "\n";
+      or die "Fail to open file '$file': '$file' $! " . join( ' ', ( caller(1) )[ 0, 1, 2, 3 ] ) . "\n";
 
     print {$fh} $content;
 

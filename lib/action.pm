@@ -26,10 +26,6 @@ use Simple::Accessor qw{
 
 use action::Helpers qw{read_file read_file_no_comments};
 
-use constant MAINTAINERS_FILE          => q[.next/maintainers];     # FIXME use settings
-use constant DEFAULT_MAINTENANCE_TEAMS => qw{p5-bulk p5-admins};    # FIXME use settings
-use constant MAINTENANCE_TEAM          => q[maintainers];           # FIXME use settings
-
 sub build ( $self, %options ) {
 
     # setup ...
@@ -71,11 +67,12 @@ sub is_maintainer($self) {    # FIXME is_repo_maintainer
     my $cd = pushd( $self->git_work_tree ) or die;
 
     # default teams which can submit patches
-    my @check_team_memberships = ( +DEFAULT_MAINTENANCE_TEAMS );
+    my @check_team_memberships = $self->settings->get( maintainers => default_maintenance_teams => )->@*;
+
+    my $maintenance_team = $self->settings->get( maintainers => team => ) or die "maintance team unset";
 
     # FIXME make sure the user is known in the maintainers group
-
-    if ( !$self->gh->is_user_team_member( $author, +MAINTENANCE_TEAM ) ) {
+    if ( !$self->gh->is_user_team_member( $author, $maintenance_team ) ) {
 
         #$self->close_pull_request( );
         # FIXME idea... maybe perform a request to add the user to maintenance...
@@ -86,9 +83,10 @@ sub is_maintainer($self) {    # FIXME is_repo_maintainer
         #return;
     }
 
-    if ( -e MAINTAINERS_FILE ) {
-        say "# maintainers file found ", MAINTAINERS_FILE;
-        my $autorized_rules = read_file_no_comments(MAINTAINERS_FILE);
+    my $maintainers_file = $self->settings->get( maintainers => file => );
+    if ( -e $maintainers_file ) {
+        say "# maintainers file found ", $maintainers_file;
+        my $autorized_rules = read_file_no_comments($maintainers_file);
         foreach my $rule (@$autorized_rules) {
             return 1 if $author eq $rule;
             if ( $rule =~ m{^teams/([a-z0-9_]+)} ) {

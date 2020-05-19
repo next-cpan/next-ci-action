@@ -16,14 +16,19 @@ use action::Helpers qw{read_json_file write_json_file write_file};
 
 use Cwd ();
 
+use File::Copy;
 use File::Temp;
 use File::Path qw(mkpath rmtree);
+
+use File::pushd;
 
 use action;
 
 my $tmp = File::Temp->newdir();
 
-my $open_pr = q[t/fixtures/pr/open.json];
+ok copy( 'settings.yml', "$tmp/settings.yml" );
+
+my $open_pr = $FindBin::Bin . q[/fixtures/pr/open.json];
 
 $ENV{MOCK_HTTP_REQUESTS} = $FindBin::Bin . q[/fixtures/test-maintainers];
 $ENV{PR_STATE_PATH}      = $open_pr;
@@ -52,8 +57,10 @@ $ENV{PR_STATE_PATH} = $tmp_pr_json;
     ok !$action->is_maintainer(), 'unknown is not a maintainer';
 }
 
-mkpath("$tmp/.next");
-write_file( "$tmp/.next/maintainers", <<'EOS' );
+my $in_tmp = pushd("$tmp");
+
+mkpath(".next");
+write_file( ".next/maintainers", <<'EOS' );
 ##
 ## This file contains a list of GitHub user or team
 ##      which can submit PR which can be merged without a review
@@ -72,7 +79,7 @@ infile
 EOS
 
 {
-    note "list a user in the .next/maintainer file";
+    note "list a user in the .next/maintainers file";
 
     my $pr = read_json_file($open_pr);
     $pr->{user}->{login} = q[infile];
@@ -85,7 +92,7 @@ EOS
 }
 
 {
-    note "list a group in the .next/maintainer file";
+    note "list a group in the .next/maintainers file";
 
     my $pr = read_json_file($open_pr);
     $pr->{user}->{login} = q[ingroup];

@@ -2,8 +2,11 @@ package action::Settings;
 
 use action::std;
 
+use FindBin;
+
 use Simple::Accessor qw{yaml content file};
 use YAML::PP;
+use Cwd ();
 
 sub build ( $self, %options ) {
 
@@ -17,10 +20,15 @@ sub _build_yaml {
 }
 
 sub _build_file {
-    my $f = q[settings.yaml];
-    die q[Cannot find $f] unless -f $f;
+    my $f = q[settings.yml];
 
-    return $f;
+    my $path;
+    foreach my $dir ( './', $FindBin::Bin . '/' ) {
+        $path = $dir . $f;
+        return $path if -f $path;
+    }
+
+    die qq[Cannot find file '$f' from ] . Cwd::getcwd unless -f $path;
 }
 
 sub _build_content($self) {
