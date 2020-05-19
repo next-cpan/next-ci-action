@@ -127,6 +127,6 @@ set -e -x
 # pull_request.review.state: approved
 # "event_name": "pull_request_review",
 
-/action/run.pl --stage $INPUT_STAGE --action $action
+/action/run.pl --stage $INPUT_STAGE --event-action $action
 
 echo "=== Next CI Action DONE ==="

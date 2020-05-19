@@ -30,7 +30,7 @@ $ENV{BOT_ACCESS_TOKEN}   = 'fake-bot-access-token';
 $ENV{GITHUB_TOKEN}       = 'fake-github-token';
 
 {
-    my $action = action->new( git => 'FAKE', git_work_tree => $tmp );
+    my $action = action->new( git => 'FAKE', cli => ['FAKE'], git_work_tree => $tmp );
     ok $action, "got an action";
     ok $action->gh, "github";
     is $action->gh->pull_request_author, 'atoomic', 'PR author';
@@ -45,7 +45,7 @@ $ENV{PR_STATE_PATH} = $tmp_pr_json;
     $pr->{user}->{login} = q[unknown];
     write_json_file( $tmp_pr_json, $pr );
 
-    my $action = action->new( git => 'FAKE', git_work_tree => $tmp );
+    my $action = action->new( git => 'FAKE', cli => ['FAKE'], git_work_tree => $tmp );
     is $action->gh->pull_request_author, 'unknown', 'PR author = unknown';
 
     ok !$action->is_maintainer(), 'unknown is not a maintainer';
@@ -77,7 +77,7 @@ EOS
     $pr->{user}->{login} = q[infile];
     write_json_file( $tmp_pr_json, $pr );
 
-    my $action = action->new( git => 'FAKE', git_work_tree => $tmp );
+    my $action = action->new( git => 'FAKE', cli => ['FAKE'], git_work_tree => $tmp );
     is $action->gh->pull_request_author, 'infile', 'PR author = infile';
 
     ok $action->is_maintainer(), 'infile is a maintainer : listed from file';
@@ -90,7 +90,7 @@ EOS
     $pr->{user}->{login} = q[ingroup];
     write_json_file( $tmp_pr_json, $pr );
 
-    my $action = action->new( git => 'FAKE', git_work_tree => $tmp );
+    my $action = action->new( git => 'FAKE', cli => ['FAKE'], git_work_tree => $tmp );
     is $action->gh->pull_request_author, 'ingroup', 'PR author = ingroup';
 
     ok $action->is_maintainer(), 'ingroup is a maintainer : group listed in file';
@@ -103,7 +103,7 @@ EOS
     $pr->{user}->{login} = q[notlisted];
     write_json_file( $tmp_pr_json, $pr );
 
-    my $action = action->new( git => 'FAKE', git_work_tree => $tmp );
+    my $action = action->new( git => 'FAKE', cli => ['FAKE'], git_work_tree => $tmp );
     is $action->gh->pull_request_author, 'notlisted', 'PR author = notlisted';
 
     ok !$action->is_maintainer(), 'notlisted is not a maintainer';
@@ -115,7 +115,7 @@ EOS
     delete $ENV{BOT_ACCESS_TOKEN};
     $ENV{PR_STATE_PATH} = $open_pr;
 
-    my $action = action->new( git => 'FAKE', git_work_tree => $tmp );
+    my $action = action->new( git => 'FAKE', cli => ['FAKE'], git_work_tree => $tmp );
     is $action->gh->pull_request_author, 'atoomic', 'PR author = atoomic';
 
     like(

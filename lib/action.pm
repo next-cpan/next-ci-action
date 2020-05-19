@@ -16,28 +16,36 @@ use Simple::Accessor qw{
 
   gh
   git
+  cli
 
   git_work_tree
 
   workflow_conclusion
+
+  settings
 };
 
 use action::Helpers qw{read_file read_file_no_comments};
 
-use constant MAINTAINERS_FILE          => q[.next/maintainers];
-use constant DEFAULT_MAINTENANCE_TEAMS => qw{p5-bulk p5-admins};
-use constant MAINTENANCE_TEAM          => q[maintainers];
+use constant MAINTAINERS_FILE          => q[.next/maintainers];     # FIXME use settings
+use constant DEFAULT_MAINTENANCE_TEAMS => qw{p5-bulk p5-admins};    # FIXME use settings
+use constant MAINTENANCE_TEAM          => q[maintainers];           # FIXME use settings
 
 sub build ( $self, %options ) {
 
     # setup ...
-    $self->git or die;    # init git early
+    $self->git or die "Missing git entry when creating action";      # init git early
+    $self->cli or die "Missing client entry when creating action";
 
     return $self;
 }
 
 sub _build_gh {
     action::GitHub->new;
+}
+
+sub _build_settings {
+    action::Settings->new;
 }
 
 sub _build_git($self) {

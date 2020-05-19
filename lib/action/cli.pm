@@ -8,10 +8,10 @@ use Getopt::Long qw(:config no_auto_abbrev no_ignore_case bundling);
 
 use action;
 
-use Simple::Accessor qw{action stage};
+use Simple::Accessor qw{action stage event_action};
 
 sub _build_action($self) {
-    main::action->new;
+    main::action->new( cli => $self );
 }
 
 sub run ( $self, @args ) {
@@ -20,9 +20,9 @@ sub run ( $self, @args ) {
     my $help;
     my $opts = Getopt::Long::GetOptionsFromArray(
         \@args,
-        'help'     => \$help,
-        'stage=s'  => \( $self->{stage} ),
-        'action=s' => \( $self->{action} ),
+        'help'           => \$help,
+        'stage=s'        => \( $self->{stage} ),
+        'event-action=s' => \( $self->{event_action} ),
     ) or return usage(1);
 
     return usage() if $help;
@@ -56,8 +56,8 @@ sub usage( $exit_code=0 ) {
 ./run.pl --stage STAGE --action ACTION
 
 Sample usages:
-    ./run.pl --stage check_ci --action opened
-    ./run.pl --stage lint     --action opened
+    ./run.pl --stage check_ci --event-action opened
+    ./run.pl --stage lint     --event-action opened
     ./run.pl --stage cron_stale
 EOS
 

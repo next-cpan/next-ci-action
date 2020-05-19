@@ -1,10 +1,17 @@
 
+git:
+  user:
+    email: 'actions@github.com'
+    name: 'GitHub Play Action'
+
 github:
   org: 'next-cpan'
-  monitor: 'next-monitor'
+  monitor_repo: 'next-monitor'
 
 maintainers:
-  default_teams:
+  file: ./next/maintainers
+  team: maintainers
+  default_maintenance_teams:
     - "p5-bulk"
     - "p5-admins"
 
