@@ -10,4 +10,4 @@ maintainers:
 
 pull_requests:
   # how many days before an issue is automatically merged in
-  stale_timeout: 7
+  stale_after_x_days: 7
