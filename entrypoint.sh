@@ -2,6 +2,17 @@
 
 set -e +x
 
+# input arguments
+
+echo "before: $INPUT_STAGE"
+INPUT_STAGE="$1"
+echo "after: $INPUT_STAGE"
+if [ "x$INPUT_STAGE" == "x" ]; then
+	echo "[Error] INPUT_STAGE is not set";
+	set
+	exit 1
+fi
+
 # import variables and functions
 DIR=/usr/bin
 
@@ -26,12 +37,6 @@ echo "============================================="
 cat "$GITHUB_EVENT_PATH"
 echo "============================================="
 echo ::endgroup::
-
-if [ "x$INPUT_STAGE" == "x" ]; then
-	echo "[Error] INPUT_STAGE is not set";
-	set
-	exit 1
-fi
 
 if [ "$PR_NUMBER" == "null" ]; then
 	echo "[Error] Cannot find Pull Request number from GitHub event!"
@@ -116,10 +121,6 @@ git log --pretty=oneline --abbrev-commit -5 origin/$TARGET_BRANCH
 echo ::endgroup::
 
 set -e -x
-
-# echo "## REBASE"
-# git rebase origin/$TARGET_BRANCH
-#git push --force-with-lease fork $HEAD_BRANCH
 
 # https://github.com/cirrus-actions/rebase/blob/master/entrypoint.sh
 # https://github.com/lots0logs/gh-action-auto-merge/blob/master/entrypoint.sh

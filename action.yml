@@ -8,6 +8,8 @@ inputs:
 runs:
   using: "docker"
   image: "Dockerfile"
+  args:
+    - ${{ inputs.stage }}
 branding:
   icon: "git-pull-request"
   color: "blue"
