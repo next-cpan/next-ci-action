@@ -23,7 +23,7 @@ sub _build_file {
     my $f = q[settings.yml];
 
     my $path;
-    foreach my $dir ( './', $FindBin::Bin . '/' ) {
+    foreach my $dir ( '/action', './', $FindBin::Bin . '/' ) {
         $path = $dir . $f;
         return $path if -f $path;
     }

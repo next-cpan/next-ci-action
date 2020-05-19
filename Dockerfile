@@ -36,6 +36,8 @@ COPY /fatlib /action/fatlib
 COPY /lib    /action/lib
 COPY /vendor /action/vendor
 
+COPY /settings.yml /action
+
 ADD entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
