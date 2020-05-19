@@ -18,7 +18,20 @@ echo ::group::parse_env
 parse_env
 echo ::endgroup::
 
-export PR_NUMBER=$(jq -r ".number" "$GITHUB_EVENT_PATH")
+export PR_NUMBER=$(jq -r ".pull_request.number" "$GITHUB_EVENT_PATH")
+
+echo ::group::GITHUB_EVENT_PATH
+echo "GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH"
+echo "============================================="
+cat "$GITHUB_EVENT_PATH"
+echo "============================================="
+echo ::endgroup::
+
+if [ "$PR_NUMBER" == "null" ]; then
+	echo "Cannot find Pull Request number from GitHub event!"
+	exit 1
+fi
+
 #export REPO_FULLNAME=$(jq -r ".repository.full_name" "$GITHUB_EVENT_PATH")
 
 echo "###############################################################"
@@ -30,6 +43,13 @@ export PR_STATE_PATH=${HOME}/pr_state.${PR_NUMBER}.json
 curl -X GET -s -H "${AUTH_HEADER}" -H "${API_HEADER}" \
           "${URI}/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
           -o $PR_STATE_PATH
+
+echo ::group::PR_STATE_PATH
+echo "PR_STATE_PATH: $PR_STATE_PATH"
+echo "============================================="
+cat $PR_STATE_PATH
+echo "============================================="
+echo ::endgroup::
 
 echo "## Setting variables"
 # values from PR_STATE_PATH
@@ -53,20 +73,6 @@ echo "# GIT_WORK_TREE:     $GIT_WORK_TREE"
 echo "# Conclusion:        $WORKFLOW_CONCLUSION" # neutral, success, cancelled, timed_out, failure
 echo "# Perl Version:     " $(perl -E 'say $]')
 echo "###############################################################"
-
-echo ::group::PR_STATE_PATH
-echo "PR_STATE_PATH: $PR_STATE_PATH"
-echo "============================================="
-cat $PR_STATE_PATH
-echo "============================================="
-echo ::endgroup::
-
-echo ::group::GITHUB_EVENT_PATH
-echo "GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH"
-echo "============================================="
-cat "$GITHUB_EVENT_PATH"
-echo "============================================="
-echo ::endgroup::
 
 set -e -xo pipefail
 
@@ -111,6 +117,9 @@ set -e -x
 
 # https://github.com/cirrus-actions/rebase/blob/master/entrypoint.sh
 # https://github.com/lots0logs/gh-action-auto-merge/blob/master/entrypoint.sh
+
+# pull_request.review.state: approved
+# "event_name": "pull_request_review",
 
 /action/run.pl $action
 
