@@ -18,6 +18,8 @@ use Simple::Accessor qw{
   git
   cli
 
+  pr_id
+
   pull_request
 
   workflow_conclusion
@@ -55,11 +57,16 @@ sub _build_workflow_conclusion {
     $ENV{WORKFLOW_CONCLUSION} or die "missing WORKFLOW_CONCLUSION";
 }
 
-sub _build_pull_request($self) {    # if unset build a PR object using the current PR_NUMBER
+sub _build_pr_id( $self ) {
     my $id = $ENV{PR_NUMBER} or die "Cannot get PR id: missing PR_NUMBER";
     $id eq 'null' and die "PR_NUMBER id is null";
 
-    return action::PullRequest->new( id => $id, gh => $self->gh );
+    return $id;
+}
+
+sub _build_pull_request($self) {    # if unset build a PR object using the current PR_NUMBER
+
+    return action::PullRequest->new( id => $self->pr_id, gh => $self->gh );
 }
 
 sub is_success($self) {

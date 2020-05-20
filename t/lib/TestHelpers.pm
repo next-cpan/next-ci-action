@@ -25,6 +25,7 @@ use File::Path qw(mkpath rmtree);
 use Git::Repository;
 
 use action::Helpers qw{write_file};
+use action::Git;
 
 use Test2::Harness::Util::IPC qw/run_cmd/;
 
@@ -45,9 +46,11 @@ sub root_dir {
     return $root;
 }
 
-sub setup_test($name) {
+sub setup_test($name='unknown') {
 
     my $root = root_dir();
+
+    $action::Git::DO_FETCH = 0;
 
     delete $ENV{GIT_WORK_TREE};
     $ENV{GITHUB_REPOSITORY}  = 'next-cpan/Next-Test-Workflow';

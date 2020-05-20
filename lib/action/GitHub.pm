@@ -246,6 +246,8 @@ sub _mock_http_for_tests {
                     $answer->{content} = eval { $self->json->decode($content) } // $content;
                 }
                 else {
+                    note "File is not available: $f";
+
                     # when requesting an unknown path from a known directory trigger an error
                     $answer->{status} = 404;
                     $answer->{reason} = 'No Content to Serve';

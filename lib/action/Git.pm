@@ -11,6 +11,8 @@ use action::Settings;
 use Simple::Accessor qw{git work_tree settings};
 use Cwd ();
 
+our $DO_FETCH = 1;
+
 sub _build_git($self) {
     return Git::Repository->new( work_tree => $self->work_tree );
 }
@@ -74,14 +76,18 @@ sub setup_repository_for_pull_request ( $self, $pull_request ) {
         $self->run( qw{remote add fork}, $url );
     }
 
-    # fetch
-    $self->run( qw{fetch origin}, $pull_request->target_branch );
-    $self->run( qw{fetch fork},   $pull_request->head_branch );
+    if ($DO_FETCH) {
 
-    $self->run( qw{reset --hard}, 'fork/' . $pull_request->head_branch );
+        # fetch
+        $self->run( qw{fetch origin}, $pull_request->target_branch );
+        $self->run( qw{fetch fork},   $pull_request->head_branch );
 
-    # download the entire commit history as the original clone is done with --depth 1
-    eval { $self->run(qw{pull --unshallow}) } or warn $@;
+        $self->run( qw{reset --hard}, 'fork/' . $pull_request->head_branch );
+
+        # download the entire commit history as the original clone is done with --depth 1
+        eval { $self->run(qw{pull --unshallow}) } or warn $@;
+    }
+
     $self->run(qw{clean -dxf});
 
     return 1;
