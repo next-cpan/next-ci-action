@@ -2,6 +2,13 @@
 
 set -e +x
 
+echo ::group::GITHUB_EVENT_PATH
+echo "[Warning] GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH"
+echo "============================================="
+cat "$GITHUB_EVENT_PATH"
+echo "============================================="
+echo ::endgroup::
+
 # input arguments
 
 # setting it is not really needed
@@ -15,27 +22,17 @@ fi
 # import variables and functions
 DIR=/usr/bin
 
-# Don't alter the import order
-echo ::group::source files
-. "$DIR"/global-variables.sh
-. "$DIR"/util-methods.sh
-. "$DIR"/git-api.sh
-#. "$DIR"/workflow.sh
-echo ::endgroup::
+export GIT_WORK_TREE=$PWD
 
-# Parse Environment Variables
-echo ::group::parse_env
-parse_env
-echo ::endgroup::
+if [ "$INPUT_STAGE" == "cron_stale" ]; then
+	/action/run.pl --stage $INPUT_STAGE
+	exit $?
+fi
+
+# check pull request #X
+# - setup pull request #X
 
 export PR_NUMBER=$(jq -r ".pull_request.number" "$GITHUB_EVENT_PATH")
-
-echo ::group::GITHUB_EVENT_PATH
-echo "[Warning] GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH"
-echo "============================================="
-cat "$GITHUB_EVENT_PATH"
-echo "============================================="
-echo ::endgroup::
 
 if [ "$PR_NUMBER" == "null" ]; then
 	echo "[Error] Cannot find Pull Request number from GitHub event!"
@@ -67,7 +64,6 @@ export TARGET_BRANCH=$(jq -r ".base.ref" "$PR_STATE_PATH")
 export HEAD_SHA=$(jq -r ".head.sha" "$PR_STATE_PATH")
 export HEAD_REPO=$(jq -r .head.repo.full_name "$PR_STATE_PATH")
 export HEAD_BRANCH=$(jq -r .head.ref "$PR_STATE_PATH")
-export GIT_WORK_TREE=$PWD
 
 # values from GITHUB_EVENT_PATH
 action=$(jq --raw-output .action "$GITHUB_EVENT_PATH")
@@ -98,8 +94,10 @@ git fetch fork   $HEAD_BRANCH
 
 # make sure we are on the branch
 git checkout -b pr_${PR_NUMBER} fork/$HEAD_BRANCH
+
 # download the entire commit history as the original clone is done with --depth 1
 git pull --unshallow 
+git clean -dxf
 
 set -e +x
 

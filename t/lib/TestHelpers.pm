@@ -10,6 +10,8 @@ use Test2::Tools::Compare qw/is/;
 use FindBin;
 
 use Carp qw/croak/;
+
+use File::Copy qw/copy/;
 use File::Spec;
 use File::Temp qw/tempfile tempdir/;
 use File::Basename qw(basename);
@@ -27,9 +29,56 @@ use action::Helpers qw{write_file};
 use Test2::Harness::Util::IPC qw/run_cmd/;
 
 use Exporter 'import';
-our @EXPORT = qw/test_action/;
+our @EXPORT = qw/test_action setup_test/;
 
 my $TMP = File::Temp->newdir();
+
+my $start = Cwd::getcwd;
+
+END {
+    chdir($start) if $start;    # make sure File::Temp cleanup can occurs
+}
+
+sub root_dir {
+    state $root = Cwd::getcwd;
+
+    return $root;
+}
+
+sub setup_test($name) {
+
+    my $root = root_dir();
+
+    delete $ENV{GIT_WORK_TREE};
+    $ENV{GITHUB_REPOSITORY}  = 'next-cpan/Next-Test-Workflow';
+    $ENV{GITHUB_TOKEN}       = 'fake-github-token';
+    $ENV{MOCK_HTTP_REQUESTS} = $FindBin::Bin . q[/fixtures/] . $name;
+
+    my $tmp_dir = init_git_directory();
+    chdir $tmp_dir or die;
+
+    copy( "$root/settings.yml", "$tmp_dir/settings.yml" );
+
+    die q[git Repository incorrectly initialized] unless -d q[.git];
+
+    return $tmp_dir;
+}
+
+sub _get_uniq_dir_for_test {
+    my $pattern = $TMP . '/test_dir_%d';
+
+    state $id = 0;
+
+    while ( ++$id ) {
+        my $tmp_dir = sprintf( $pattern, $id );
+        next if -e $tmp_dir;
+        return abs_path($tmp_dir);    # available
+
+        die "more than 1000 tests!" if $id > 1000;
+    }
+
+    return;
+}
 
 sub build_cli_cmd {
     state $cache;
@@ -53,7 +102,7 @@ sub build_cli_cmd {
 
 sub init_git_directory {
 
-    my $fake_git_dir = "$TMP/fake_git_dir";
+    my $fake_git_dir = _get_uniq_dir_for_test();
 
     rmtree($fake_git_dir) if -d $fake_git_dir;
     mkpath($fake_git_dir) or die;
@@ -67,6 +116,8 @@ sub init_git_directory {
     $git->run(qw{config advice.ignoredHook false});
     $git->run( 'add', 'README' );
     $git->run( 'commit', '-m', "My First Commit" );
+
+    $git->run( 'remote', 'add', 'origin', 'http://127.0.0.1/void.git' );
 
     return $fake_git_dir;
 }

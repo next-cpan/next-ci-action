@@ -2,14 +2,15 @@ package action;
 
 use action::std;
 
+use action::Git;
 use action::GitHub;
 use action::Settings;
-
-use Git::Repository;
+use action::PullRequest;
 
 use Test::More;
 
 use File::pushd;
+use Cwd;
 
 use Simple::Accessor qw{
 
@@ -17,7 +18,7 @@ use Simple::Accessor qw{
   git
   cli
 
-  git_work_tree
+  pull_request
 
   workflow_conclusion
 
@@ -32,6 +33,9 @@ sub build ( $self, %options ) {
     $self->git or die "Missing git entry when creating action";      # init git early
     $self->cli or die "Missing client entry when creating action";
 
+    $self->git->setup_repository_for_pull_request( $self->pull_request )
+      or die "Fail to setup Git Repo for PullRequest";
+
     return $self;
 }
 
@@ -44,15 +48,18 @@ sub _build_settings {
 }
 
 sub _build_git($self) {
-    return Git::Repository->new( work_tree => $self->git_work_tree );
-}
-
-sub _build_git_work_tree {
-    return ( $ENV{GIT_WORK_TREE} or die q[GIT_WORK_TREE is unset] );
+    return action::Git->new( settings => $self->settings );
 }
 
 sub _build_workflow_conclusion {
     $ENV{WORKFLOW_CONCLUSION} or die "missing WORKFLOW_CONCLUSION";
+}
+
+sub _build_pull_request($self) {    # if unset build a PR object using the current PR_NUMBER
+    my $id = $ENV{PR_NUMBER} or die "Cannot get PR id: missing PR_NUMBER";
+    $id eq 'null' and die "PR_NUMBER id is null";
+
+    return action::PullRequest->new( id => $id, gh => $self->gh );
 }
 
 sub is_success($self) {
@@ -60,11 +67,11 @@ sub is_success($self) {
 }
 
 # check if the action is coming from a maintainer
-sub is_maintainer($self) {    # FIXME is_repo_maintainer
+sub is_maintainer($self) {          # FIXME is_repo_maintainer
     my $author = $self->gh->pull_request_author or die;
 
     # make sure we are in the git work tree
-    my $cd = pushd( $self->git_work_tree ) or die;
+    my $cd = pushd( $self->git->work_tree ) or die;
 
     # default teams which can submit patches
     my @check_team_memberships = $self->settings->get( maintainers => default_maintenance_teams => )->@*;
@@ -107,42 +114,20 @@ sub is_maintainer($self) {    # FIXME is_repo_maintainer
 sub rebase_and_merge($self) {
     my $target_branch = $self->gh->target_branch;
 
-    my $out;
-
-    # ... need a hard reset first
-    # pull_request.head.sha
-
-    say "pull_request.head.sha ", $self->gh->pull_request_sha;
-
     ### FIXME: we can improve this part with a for loop to retry
-    ###		   when dealing with multiple requests
+    ###        when dealing with multiple requests
 
-    my $ok = eval {
-        say "rebasing branch";
-        $out = $self->git->run( 'rebase', "origin/$target_branch" );
-        say "rebase: $out";
-        $self->in_rebase() ? 0 : 1;    # abort if we are in middle of a rebase conflict
-    } or do {
-        $self->gh->close_pull_request("fail to rebase branch to ${target_branch}. Please fix and resubmit.");
+    if ( !$self->git->rebase("origin/$target_branch") ) {
+        $self->gh->close_pull_request("Fail to rebase branch to ${target_branch}. Please fix and resubmit.");
         return;
-    };
+    }
 
-    $out = $self->git->run( 'push', '--force-with-lease', "origin", "HEAD:$target_branch" );
-    $ok &= $? == 0;
-    $self->gh->add_comment("**Clean PR** from Maintainer merging to $target_branch branch");
+    my $out = $self->git->run( 'push', '--force-with-lease', "origin", "HEAD:$target_branch" );
+    my $ok  = $? == 0;
+
+    $self->gh->add_comment("**Clean PR** from Maintainer merged to $target_branch branch");
 
     return $ok;
-}
-
-sub in_rebase($self) {
-
-    my $rebase_merge = $self->git->run(qw{rev-parse --git-path rebase-merge});
-    return 1 if $rebase_merge && -d $rebase_merge;
-
-    my $rebase_apply = $self->git->run(qw{rev-parse --git-path rebase-merge});
-    return 1 if $rebase_apply && -d $rebase_apply;
-
-    return 0;
 }
 
 1;

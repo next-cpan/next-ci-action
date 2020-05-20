@@ -9,35 +9,25 @@ use Simple::Accessor qw{
   github_user
   github_token
 
-  pull_request_state_path
-  pull_request_state
-
   ua
   json
-
-  target_branch
-  pr_id
 
   default_org
   default_repository
 
   headers
-
-  repo_full_name
 };
 
 use JSON::PP ();
 
 use Test::More;
 
-use constant BASE_API_URL => q[https://api.github.com];
-use constant DEFAULT_ORG  => q[next-cpan];
+use constant BASE_API_URL => q[https://api.github.com];    # FIXME settings
+use constant DEFAULT_ORG  => q[next-cpan];                 # FIXME settings
 
 sub build ( $self, %options ) {
 
     _mock_http_for_tests() if $ENV{MOCK_HTTP_REQUESTS};
-
-    $self->repo_full_name or die;
 
     return $self;
 }
@@ -51,7 +41,7 @@ sub _build_default_repository {
 }
 
 sub _build_ua {
-    HTTP::Tinyish->new( agent => "NextCpan/1.0" );
+    HTTP::Tinyish->new( agent => "nextCPAN/1.0" );
 }
 
 sub _build_github_user {
@@ -66,72 +56,49 @@ sub _build_json {
     return JSON::PP->new->utf8->relaxed->allow_nonref;
 }
 
-sub _build_pull_request_state($self) {
-    return $self->json->decode( read_file( $self->pull_request_state_path ) );
+sub close_pull_request ( $self, $issue ) {
+    die q[Need a Pull Request object] unless ref $issue;
+
+    my ( $repo, $id ) = ( $issue->github_repository, $issue->id );
+    say "Closing Pull Request #id in repo $repo";
+
+    my $uri = sprintf( "/repos/%s/pulls/%s", $repo, $id );
+
+    return $self->patch( $uri, { "state" => "closed" } );
 }
 
-sub _build_pull_request_state_path {
-    my $f = $ENV{PR_STATE_PATH} or die "PR_STATE_PATH unset";
-    die "pull_request_state_path does not exist" unless -e $f && -s _;
-    return $f;
-}
-
-sub _build_pr_id ($self) {
-    my $id = $self->pull_request_state->{number} or die "Cannot find PR number";
-    return $id;
-}
-
-sub _build_repo_full_name($self) {
-    my $full_name = $self->pull_request_state->{head}->{repo}->{full_name} or die "Cannot find repo full_name";
-
-    my ( $org, $repo ) = split( '/', $full_name );
-    $self->default_org($org);
-    $self->default_repository($repo);
-
-    return $full_name;
-}
-
-sub pull_request_sha($self) {    # _build_ ...
-                                 # pull_request.head.sha
-    my $target = $self->pull_request_state->{head}->{sha} or die "Cannot find pull_request.head.sha branch";
-    return $target;
-}
-
-sub pull_request_author($self) {    # build.. ?
-
-    my $author = $self->pull_request_state->{user}->{login} or die "Cannot find PR author: user.login";
-    return $author;
-}
-
-sub _build_target_branch($self) {
-    my $target = $self->pull_request_state->{base}->{ref} or die "Cannot find target branch";
-    return $target;
-}
-
-sub close_pull_request ( $self, $msg = undef ) {
-
-    say "Closing Pull Request #", $self->pr_id;
-
-    $self->add_comment($msg) if $msg;
-
-    my $uri = sprintf( "/repos/%s/pulls/%s", $self->repo_full_name, $self->pr_id );
-    $self->patch( $uri, { "state" => "closed" } );
-
-    return;
-}
-
-# add a comment to the current PR
-sub add_comment ( $self, $comment ) {
+sub add_comment_to_issue ( $self, $issue, $comment ) {
     return unless defined $comment;
 
-    my $id = $self->pr_id;
-    say "adding a comment to the Pull Request #$id $comment";
+    my ( $repo, $id ) = ( $issue->github_repository, $issue->id );
+    say "adding a comment to the Pull Request #$id for $repo $comment";
 
-    my $uri = sprintf( "/repos/%s/issues/%s/comments", $self->repo_full_name, $self->pr_id );
+    my $uri = sprintf( "/repos/%s/issues/%s/comments", $repo, $id );
 
-    $self->post( $uri, { "body" => $comment } );
+    return $self->post( $uri, { "body" => $comment } );
+}
 
-    return;
+sub get_pr_state ( $self, $repo_full_name, $id ) {
+
+    my $uri    = sprintf( "/repos/%s/pulls/%s", $repo_full_name, $id );
+    my $answer = $self->get($uri);
+
+    if ( !$answer->{status} || $answer->{status} != 200 ) {
+        die qq[Cannot find PR $id: $uri\n] . explain($answer);
+    }
+
+    say <<"EOS";
+::group::[Warning] $uri
+=============================================
+$answer->{content}
+=============================================
+::endgroup::
+EOS
+
+    my $state = $self->json->decode( $answer->{content} )
+      or die "get_pr_state $uri: fail to decode " . $answer->{content};
+
+    return $state;
 }
 
 sub is_user_team_member ( $self, $user, $team, $org = +DEFAULT_ORG ) {
