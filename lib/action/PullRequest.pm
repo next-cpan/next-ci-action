@@ -35,7 +35,7 @@ sub target_branch($self) {
     $self->state->{base}->{ref} or die;
 }
 
-sub head_sha($self) {
+sub head_sha($self) {    # alias or rename ?
     $self->state->{head}->{sha} or die;
 }
 
@@ -45,6 +45,12 @@ sub head_repo($self) {
 
 sub head_branch($self) {
     $self->state->{head}->{ref} or die;
+}
+
+sub author($self) {
+    my $author = $self->state->{user}->{login} or die "Cannot find PR author: user.login";
+
+    return $author;
 }
 
 sub info($self) {
@@ -66,8 +72,14 @@ sub info($self) {
 # interactions with gh
 
 sub add_comment ( $self, $comment ) {
-
     return $self->gh->add_comment_to_issue( $self, $comment );
+}
+
+sub close ( $self, $comment ) {
+
+    $self->add_comment($comment) if $comment;
+
+    return $self->gh->close_pull_request($self);
 }
 
 1;

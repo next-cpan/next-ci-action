@@ -24,39 +24,26 @@ use File::pushd;
 
 use action;
 
-my $tmp = File::Temp->newdir();
-
-ok copy( 'settings.yml', "$tmp/settings.yml" );
-
-my $open_pr = $FindBin::Bin . q[/fixtures/pr/open.json];
-
-$ENV{MOCK_HTTP_REQUESTS} = $FindBin::Bin . q[/fixtures/test-maintainers];
-$ENV{PR_STATE_PATH}      = $open_pr;
-$ENV{BOT_ACCESS_TOKEN}   = 'fake-bot-access-token';
-$ENV{GITHUB_TOKEN}       = 'fake-github-token';
+my $tmp = setup_test('test-maintainers');
 
 {
-    my $action = action->new( git => 'FAKE', cli => ['FAKE'], git_work_tree => $tmp );
+    my $action = action->new( cli => ['FAKE'], pr_id => 29 );
     ok $action, "got an action";
     ok $action->gh, "github";
-    is $action->gh->pull_request_author, 'atoomic', 'PR author';
+    is $action->pull_request->author, 'atoomic', 'PR author';
     ok $action->is_maintainer(), 'atoomic is a maintainer';
 }
 
-my $tmp_pr_json = "$tmp/pr.json";
-$ENV{PR_STATE_PATH} = $tmp_pr_json;
-
 {
-    my $pr = read_json_file($open_pr);
-    $pr->{user}->{login} = q[unknown];
-    write_json_file( $tmp_pr_json, $pr );
-
-    my $action = action->new( git => 'FAKE', cli => ['FAKE'], git_work_tree => $tmp );
-    is $action->gh->pull_request_author, 'unknown', 'PR author = unknown';
+    my $action = action->new( cli => ['FAKE'], pr_id => 42 );
+    is $action->pull_request->author, 'unknown', 'PR author = unknown';
 
     ok !$action->is_maintainer(), 'unknown is not a maintainer';
 }
 
+done_testing;
+exit;
+__END__
 my $in_tmp = pushd("$tmp");
 
 mkpath(".next");

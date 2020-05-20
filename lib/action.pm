@@ -75,7 +75,7 @@ sub is_success($self) {
 
 # check if the action is coming from a maintainer
 sub is_maintainer($self) {          # FIXME is_repo_maintainer
-    my $author = $self->gh->pull_request_author or die;
+    my $author = $self->pull_request->author or die;
 
     # make sure we are in the git work tree
     my $cd = pushd( $self->git->work_tree ) or die;
@@ -91,7 +91,7 @@ sub is_maintainer($self) {          # FIXME is_repo_maintainer
         #$self->close_pull_request( );
         # FIXME idea... maybe perform a request to add the user to maintenance...
         # could not perform the final merge
-        $self->gh->add_comment("user \@$author is not listed in maintenance team please request...");
+        $self->pull_request->add_comment("user \@$author is not listed in maintenance team please request...");
 
         # we should abort ..,
         #return;

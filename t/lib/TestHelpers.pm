@@ -26,6 +26,7 @@ use Git::Repository;
 
 use action::Helpers qw{write_file};
 use action::Git;
+use action::GitHub;
 
 use Test2::Harness::Util::IPC qw/run_cmd/;
 
@@ -50,17 +51,20 @@ sub setup_test($name='unknown') {
 
     my $root = root_dir();
 
-    $action::Git::DO_FETCH = 0;
+    $action::Git::DO_FETCH   = 0;
+    $action::GitHub::VERBOSE = 0;
 
     delete $ENV{GIT_WORK_TREE};
     $ENV{GITHUB_REPOSITORY}  = 'next-cpan/Next-Test-Workflow';
     $ENV{GITHUB_TOKEN}       = 'fake-github-token';
     $ENV{MOCK_HTTP_REQUESTS} = $FindBin::Bin . q[/fixtures/] . $name;
+    $ENV{BOT_ACCESS_TOKEN}   = 'fake-bot-access-token';
 
     my $tmp_dir = init_git_directory();
     chdir $tmp_dir or die;
 
-    copy( "$root/settings.yml", "$tmp_dir/settings.yml" );
+    no warnings 'redefine';
+    *action::Settings::_build_file = sub { "$root/settings.yml" };    # FIXME should mock it
 
     die q[git Repository incorrectly initialized] unless -d q[.git];
 

@@ -25,6 +25,8 @@ use Test::More;
 use constant BASE_API_URL => q[https://api.github.com];    # FIXME settings
 use constant DEFAULT_ORG  => q[next-cpan];                 # FIXME settings
 
+our $VERBOSE = 1;
+
 sub build ( $self, %options ) {
 
     _mock_http_for_tests() if $ENV{MOCK_HTTP_REQUESTS};
@@ -87,13 +89,17 @@ sub get_pr_state ( $self, $repo_full_name, $id ) {
         die qq[Cannot find PR $id: $uri\n] . explain($answer);
     }
 
-    say <<"EOS";
+    if ($VERBOSE) {
+
+        say <<"EOS";
 ::group::[Warning] $uri
 =============================================
 $answer->{content}
 =============================================
 ::endgroup::
 EOS
+
+    }
 
     my $state = $self->json->decode( $answer->{content} )
       or die "get_pr_state $uri: fail to decode " . $answer->{content};
@@ -136,7 +142,7 @@ sub get_as_bot ( $self, $uri ) {
         ### ... could consider posting a comment to a repo which automatically setup the TOKEN for us
         ### view https://github.com/marketplace/actions/slash-command-dispatch
         ### /need-token $REPO $PR JOB_ID
-        $self->add_comment("**WARNING:** missing BOT_ACCESS_TOKEN in the repository. Please contact an \@admin-group");
+        #$self->add_comment("**WARNING:** missing BOT_ACCESS_TOKEN in the repository. Please contact an \@admin-group");
         die "missing BOT_ACCESS_TOKEN";
     }
 
