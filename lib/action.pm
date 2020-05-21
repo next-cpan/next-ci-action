@@ -23,9 +23,9 @@ use Simple::Accessor qw{
   pull_request
 
   workflow_conclusion
-
-  settings
 };
+
+with 'action::Roles::Settings';
 
 use action::Helpers qw{read_file read_file_no_comments};
 
@@ -43,10 +43,6 @@ sub build ( $self, %options ) {
 
 sub _build_gh {
     action::GitHub->new;
-}
-
-sub _build_settings {
-    action::Settings->new;
 }
 
 sub _build_git($self) {
@@ -71,6 +67,10 @@ sub _build_pull_request($self) {    # if unset build a PR object using the curre
 
 sub is_success($self) {
     return $self->workflow_conclusion eq 'success';
+}
+
+sub is_known_maintainer_for_organization($self) {
+
 }
 
 # check if the action is coming from a maintainer

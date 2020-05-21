@@ -5,6 +5,7 @@ git:
     name: 'GitHub Play Action'
 
 github:
+  base_api_url: https://api.github.com
   org: 'next-cpan'
   monitor_repo: 'next-monitor'
 

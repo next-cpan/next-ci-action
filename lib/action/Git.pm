@@ -8,17 +8,16 @@ use Git::Repository;
 
 use action::Settings;
 
-use Simple::Accessor qw{git work_tree settings};
+use Simple::Accessor qw{git work_tree};
+
+with 'action::Roles::Settings';
+
 use Cwd ();
 
 our $DO_FETCH = 1;
 
 sub _build_git($self) {
     return Git::Repository->new( work_tree => $self->work_tree );
-}
-
-sub _build_settings {
-    action::Settings->new;
 }
 
 sub _build_work_tree($self) {
