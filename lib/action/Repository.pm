@@ -11,8 +11,11 @@ use action::Repository::Maintainers;
 use action::GitHub::Action qw{WARN ERROR FATAL};
 
 use Simple::Accessor qw{
+  root_dir
+
   pull_request
   maintainers
+
 };
 
 with 'action::Roles::Settings';
@@ -20,9 +23,16 @@ with 'action::Roles::GitHub';
 
 use action::Helpers qw{read_file_no_comments};
 
+sub build ( $self, %options ) {
+    $self->{root_dir} // FATAL("root_dir unset");
+
+    return $self;
+}
+
 sub _build_maintainers($self) {
 
-    # assune we are in the repository director
+    # make sure we are in the git work tree
+    my $cd = pushd( $self->root_dir ) or FATAL( "Cannot chdir to root_dir: ", $self->root_dir );
 
     my $maintainers_file = $self->settings->get( maintainers => file => )
       or FATAL("Missing settings for maintainers file");

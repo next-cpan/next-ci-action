@@ -34,7 +34,7 @@ my $in_tmp = pushd("$tmp");
 my @default_teams = qw{ p5-bulk p5-admins };    # FIXME from config ?
 
 {
-    my $repo = action::Repository->new;
+    my $repo = action::Repository->new( root_dir => $tmp );
     ok $repo, "action::Repository->new;";
 
     my $maintainers = $repo->maintainers;
@@ -61,7 +61,7 @@ user3
 
 EOS
 
-    my $repo = action::Repository->new;
+    my $repo = action::Repository->new( root_dir => $tmp );
     ok $repo, "action::Repository->new;";
 
     my $maintainers = $repo->maintainers;

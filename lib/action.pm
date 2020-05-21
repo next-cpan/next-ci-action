@@ -25,6 +25,8 @@ use Simple::Accessor qw{
   pull_request
 
   workflow_conclusion
+
+  repository
 };
 
 with 'action::Roles::Settings';
@@ -59,6 +61,10 @@ sub _build_pr_id( $self ) {
     return $id;
 }
 
+sub _build_repository( $self ) {
+    return action::Repository->new( root_dir => $self->git->work_tree );
+}
+
 sub _build_pull_request($self) {    # if unset build a PR object using the current PR_NUMBER
 
     return action::PullRequest->new( id => $self->pr_id, gh => $self->gh );
@@ -83,12 +89,6 @@ sub request_review_from_repository_maintainers($self) {
 sub is_repository_maintainer($self) {    # FIXME is_repo_maintainer
     my $author = $self->pull_request->author or die;
 
-    # make sure we are in the git work tree
-    my $cd = pushd( $self->git->work_tree ) or die;
-
-    # default teams which can submit patches
-    my @check_team_memberships = $self->settings->get( maintainers => default_maintenance_teams => )->@*;
-
     my $maintenance_team = $self->settings->get( maintainers => team => ) or die "maintance team unset";
 
     # FIXME make sure the user is known in the maintainers group
@@ -110,7 +110,7 @@ MSG
     }
 
     # maybe store the repo
-    return action::Repository->new()->is_maintainer($author);
+    return $self->repository->is_maintainer($author);
 }
 
 sub rebase_and_merge($self) {
