@@ -7,4 +7,5 @@
 on test => sub {
 	requires 'Test::More';
 	requires 'Test2::Harness::Util::IPC';
+    requires 'Capture::Tiny';
 };

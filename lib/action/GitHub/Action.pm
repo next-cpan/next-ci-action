@@ -18,6 +18,25 @@ sub ERROR(@msg) {    # display a read message
     return;
 }
 
+sub set_variable ( $name, $value ) {
+    $value //= '';
+
+    say '::set-output name=', $name, '::', $value;
+
+    return;
+}
+
+sub display_group ( $name, $content ) {
+
+    say '::group::', $name;
+    say "=" x 50;
+    say $content;
+    say "=" x 50;
+    say "::endgroup::";
+
+    return;
+}
+
 ## artifact...
 
 1;

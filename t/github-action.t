@@ -27,4 +27,28 @@ is $stdout, qq{[Warning] this is a test\n}, "WARN";
 
 is $stdout, qq{[Error] this is a test\n}, "ERROR";
 
+( $stdout, $stderr, @result ) = capture {
+    action::GitHub::Action::set_variable( 'mykey', 'myvalue' );
+};
+
+is $stdout, qq[::set-output name=mykey::myvalue\n], 'set_variable';
+
+my $content = <<'EOS';
+This is a content
+on multiple
+lines
+EOS
+
+( $stdout, $stderr, @result ) = capture {
+    action::GitHub::Action::display_group( 'group name', $content );
+};
+
+is $stdout, <<"EOS", "display_group";
+::group::group name
+==================================================
+$content
+==================================================
+::endgroup::
+EOS
+
 done_testing;
