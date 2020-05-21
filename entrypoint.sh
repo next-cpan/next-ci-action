@@ -24,7 +24,7 @@ export GIT_WORK_TREE=$PWD
 export PR_NUMBER=$(jq -r ".pull_request.number" "$GITHUB_EVENT_PATH")
 action=$(jq --raw-output .action "$GITHUB_EVENT_PATH")
 
-echo "perl -cw"
+echo "# perl -cw"
 perl -cw /action/run.pl ||:
 
 echo "# RUN: /action/run.pl --stage $INPUT_STAGE --event-action $action"
