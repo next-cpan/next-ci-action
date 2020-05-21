@@ -125,22 +125,37 @@ MSG
 }
 
 sub rebase_and_merge($self) {
-    my $target_branch = $self->gh->target_branch;
+    my $target_branch = $self->pull_request->target_branch;
 
-    ### FIXME: we can improve this part with a for loop to retry
-    ###        when dealing with multiple requests
+    my $timeout   = $self->settings->get( rebase => timeout   => ) or die "timeout unset";
+    my $retry_max = $self->settings->get( rebase => retry_max => ) or die "retry_max unset";
 
-    if ( !$self->git->rebase("origin/$target_branch") ) {
-        $self->gh->close_pull_request("Fail to rebase branch to ${target_branch}. Please fix and resubmit.");
-        return;
+    my $attempt = 0;
+
+    # retry several times to solve concurrency issues
+    while ( ++$attempt <= $retry_max ) {
+
+        if ( !$self->git->rebase("origin/$target_branch") ) {
+            $self->pull_request->close("Fail to rebase branch to ${target_branch}. Please fix and resubmit.");
+            return;
+        }
+
+        my $out = $self->git->run( 'push', '--force-with-lease', "origin", "HEAD:$target_branch" );
+        my $ok  = $? == 0;
+        if ($ok) {
+            $self->pull_request->close("**Clean PR** from Maintainer merged to $target_branch branch");
+        }
+
+        say "[Warning] rebase + push failure, sleep and retry";
+
+        sleep($timeout);
+        my $out = $self->git->run( 'fetch', 'origin' );
     }
 
-    my $out = $self->git->run( 'push', '--force-with-lease', "origin", "HEAD:$target_branch" );
-    my $ok  = $? == 0;
+    say "[Error] fail to push to upstream repo after $retry_max attempts.";
+    $self->pull_request->add_comment("**Clean PR** fail to push to upstream repo after $retry_max attempts.");
 
-    $self->gh->add_comment("**Clean PR** from Maintainer merged to $target_branch branch");
-
-    return $ok;
+    return;
 }
 
 1;
