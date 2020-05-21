@@ -97,7 +97,7 @@ sub setup_repository_for_pull_request ( $self, $pull_request ) {
         # fetch
         $self->run( qw{fetch origin}, $pull_request->target_branch );
         $self->run( qw{fetch fork},   $pull_request->head_branch );
-        eval { $self->run(qw{br -D check_pr}) };    # silently fail
+        eval { $self->run(qw{branch -D check_pr}) };    # silently fail
         $self->run( qw{checkout -b check_pr}, 'fork/' . $pull_request->head_branch );
 
         # download the entire commit history as the original clone is done with --depth 1
