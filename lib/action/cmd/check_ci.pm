@@ -16,7 +16,7 @@ sub run($action) {
     }
 
     # action is a success
-    if ( $action->is_maintainer ) {    # FIXME is_repo_maintainer
+    if ( $action->is_repository_maintainer ) {    # FIXME is_repo_maintainer
         return $action->rebase_and_merge ? 0 : 1;
     }
     else {

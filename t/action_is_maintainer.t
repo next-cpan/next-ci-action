@@ -36,14 +36,14 @@ my $git = action::Git->new( work_tree => $tmp );
     ok $action, "got an action";
     ok $action->gh, "github";
     is $action->pull_request->author, 'atoomic', 'PR author';
-    ok $action->is_maintainer(), 'atoomic is a maintainer';
+    ok $action->is_repository_maintainer(), 'atoomic is a maintainer';
 }
 
 {
     my $action = action->new( cli => ['FAKE'], pr_id => 42 );
     is $action->pull_request->author, 'unknown', 'PR author = unknown';
 
-    ok !$action->is_maintainer(), 'unknown is not a maintainer';
+    ok !$action->is_repository_maintainer(), 'unknown is not a maintainer';
 }
 
 my $in_tmp = pushd("$tmp");
@@ -75,7 +75,7 @@ $git->add_and_commit(".next/maintainers");
     my $action = action->new( cli => ['FAKE'], pr_id => 1 );
     is $action->pull_request->author, 'infile', 'PR author = infile';
 
-    ok $action->is_maintainer(), 'infile is a maintainer : listed from file';
+    ok $action->is_repository_maintainer(), 'infile is a maintainer : listed from file';
 }
 
 {
@@ -84,7 +84,7 @@ $git->add_and_commit(".next/maintainers");
     my $action = action->new( cli => ['FAKE'], pr_id => 2 );
     is $action->pull_request->author, 'ingroup', 'PR author = ingroup';
 
-    ok $action->is_maintainer(), 'ingroup is a maintainer : group listed in file';
+    ok $action->is_repository_maintainer(), 'ingroup is a maintainer : group listed in file';
 }
 
 # avoid to setup a custom file for it
@@ -97,7 +97,7 @@ my $mock = Test::MockModule->new('action::PullRequest')    # .
     my $action = action->new( cli => ['FAKE'], pr_id => 1 );
     is $action->pull_request->author, 'notlisted', 'PR author = notlisted';
 
-    ok !$action->is_maintainer(), 'notlisted is not a maintainer';
+    ok !$action->is_repository_maintainer(), 'notlisted is not a maintainer';
 }
 
 {
@@ -109,7 +109,7 @@ my $mock = Test::MockModule->new('action::PullRequest')    # .
     is $action->pull_request->author, 'notlisted', 'PR author = notlisted';
 
     like(
-        dies { $action->is_maintainer() },
+        dies { $action->is_repository_maintainer() },
         qr/missing BOT_ACCESS_TOKEN/m,
         "comment and die when BOT_ACCESS_TOKEN is missing"
     );
