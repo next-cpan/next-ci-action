@@ -143,6 +143,9 @@ sub get_as_bot ( $self, $uri ) {
         ### view https://github.com/marketplace/actions/slash-command-dispatch
         ### /need-token $REPO $PR JOB_ID
         #$self->add_comment("**WARNING:** missing BOT_ACCESS_TOKEN in the repository. Please contact an \@admin-group");
+
+        ## FIXME report to the dashboard ?
+
         die "missing BOT_ACCESS_TOKEN";
     }
 

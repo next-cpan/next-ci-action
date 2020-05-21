@@ -39,6 +39,22 @@ sub run ( $self, @args ) {
     return $self->git->run(@args);
 }
 
+# convenient helpers
+sub add ( $self, @what ) {
+    $self->run( 'add', @what );
+}
+
+sub commit ( $self, $message ) {
+    $self->run( 'commit', '-m', $message );
+}
+
+sub add_and_commit ( $self, @what ) {
+    $self->add(@what);
+    $self->commit( 'update file: ' . $what[0] );
+
+    return;
+}
+
 # helpers
 sub get_repository_url ( $self, $repository, $token = undef ) {
     $token //= $ENV{GITHUB_TOKEN} or die "missing GITHUB_TOKEN";
