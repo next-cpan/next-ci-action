@@ -5,7 +5,8 @@ git:
     name: 'GitHub Play Action'
 
 github:
-  base_api_url: https://api.github.com
+  base_api_url: 'https://api.github.com'
+  base_url: 'https://github.com'
   org: next-cpan
 
   monitor:
@@ -13,7 +14,7 @@ github:
     issues:      
       missing_token: 1
       slash_command: 2
-      #no_response:
+      request_maintainers_membership: 3
 
 maintainers:
   file: .next/maintainers

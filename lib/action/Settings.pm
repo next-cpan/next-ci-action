@@ -60,4 +60,23 @@ sub get ( $self, @list ) {
     return $content;
 }
 
+sub url_for_monitor_issue ( $self, $label ) {
+
+    my $base_url = $self->get( github => base_url => ) or die "no base_url";
+    my $org      = $self->get( github => org      => ) or die;
+
+    my $repo = $self->get( github => monitor => repo => ) or die;
+
+    my $id = $self->get( github => monitor => issues => $label )
+      or die "no issue set for label $label";
+
+    return sprintf(
+        "%s/%s/%s/issues/%d",
+        $base_url,
+        $org,
+        $repo,
+        $id
+    );
+}
+
 1;

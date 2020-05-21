@@ -88,10 +88,16 @@ sub is_repository_maintainer($self) {    # FIXME is_repo_maintainer
     # FIXME make sure the user is known in the maintainers group
     if ( !$self->gh->is_user_team_member( $author, $maintenance_team ) ) {
 
-        #$self->close_pull_request( );
-        # FIXME idea... maybe perform a request to add the user to maintenance...
+        my $org      = $self->settings->get( github => org => );
+        my $teamname = $org . '/' . $maintenance_team;
+
+        my $url = $self->settings->url_for_monitor_issue('request_maintainers_membership');
+
         # could not perform the final merge
-        $self->pull_request->add_comment("user \@$author is not listed in maintenance team please request...");
+        $self->pull_request->add_comment( ~<<"MSG" );
+            user \@$author is not listed in maintenance team \@$teamname
+            Please read $url
+MSG
 
         # we should abort ..,
         #return;
