@@ -22,8 +22,7 @@ use JSON::PP ();
 
 use Test::More;
 
-use constant BASE_API_URL => q[https://api.github.com];    # FIXME settings
-use constant DEFAULT_ORG  => q[next-cpan];                 # FIXME settings
+with 'action::Roles::Settings';
 
 our $VERBOSE = 1;
 
@@ -56,6 +55,14 @@ sub _build_github_token {
 
 sub _build_json {
     return JSON::PP->new->utf8->relaxed->allow_nonref;
+}
+
+sub BASE_API_URL ($self) {
+    return $self->settings->get( github => base_api_url => );
+}
+
+sub DEFAULT_ORG ($self) {
+    return $self->settings->get( github => org => );
 }
 
 sub close_pull_request ( $self, $issue ) {
@@ -107,7 +114,9 @@ EOS
     return $state;
 }
 
-sub is_user_team_member ( $self, $user, $team, $org = +DEFAULT_ORG ) {
+sub is_user_team_member ( $self, $user, $team, $org = undef ) {
+
+    $org //= $self->DEFAULT_ORG();
 
     # https://developer.github.com/v3/teams/members/#get-team-membership
     # GET /orgs/next-cpan/teams/maintainers/memberships/atoomic
@@ -153,7 +162,7 @@ sub get_as_bot ( $self, $uri ) {
     my $headers = $self->_build_headers( $ENV{BOT_ACCESS_TOKEN} );
 
     return $self->ua->get(
-        BASE_API_URL . $uri,
+        $self->BASE_API_URL() . $uri,
         {
             headers => $headers,
         }
@@ -163,7 +172,7 @@ sub get_as_bot ( $self, $uri ) {
 sub get ( $self, $uri ) {
 
     return $self->ua->get(
-        BASE_API_URL . $uri,
+        $self->BASE_API_URL() . $uri,
         {
             headers => $self->headers,
         }
@@ -173,7 +182,7 @@ sub get ( $self, $uri ) {
 sub post ( $self, $uri, $content ) {
 
     return $self->ua->post(
-        BASE_API_URL . $uri,
+        $self->BASE_API_URL() . $uri,
         {
             headers => $self->headers,
             content => $self->encode_content($content),
@@ -184,7 +193,7 @@ sub post ( $self, $uri, $content ) {
 sub patch ( $self, $uri, $content ) {
 
     return $self->ua->patch(
-        BASE_API_URL . $uri,
+        $self->BASE_API_URL() . $uri,
         {
             headers => $self->headers,
             content => $self->encode_content($content),
