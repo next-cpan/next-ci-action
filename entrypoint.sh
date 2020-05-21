@@ -2,10 +2,15 @@
 
 set -e +x
 
-echo ::group::GITHUB_EVENT_PATH
-echo "[Warning] GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH"
+echo "::group::GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH"
 echo "============================================="
 cat "$GITHUB_EVENT_PATH"
+echo "============================================="
+echo ::endgroup::
+
+echo "::group::ENV"
+echo "============================================="
+set
 echo "============================================="
 echo ::endgroup::
 
@@ -14,8 +19,7 @@ echo ::endgroup::
 # setting it is not really needed
 #INPUT_STAGE="$1"
 if [ "x$INPUT_STAGE" == "x" ]; then
-	echo "[Error] INPUT_STAGE is not set";
-	set
+	echo "[Error] INPUT_STAGE is not set";	
 	exit 1
 fi
 
