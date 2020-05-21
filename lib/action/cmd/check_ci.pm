@@ -11,17 +11,18 @@ sub run($action) {
     say "workflow_conclusion: ", $conclusion;
 
     if ( !$action->is_success ) {
-        $action->gh->close_pull_request("**Automatically closing** the Pull Request on failure: workflow conclusion was **$conclusion**");
+        $action->pull_request->close("**Automatically closing** the Pull Request on failure: workflow conclusion was **$conclusion**");
         return;
     }
 
     # action is a success
     if ( $action->is_repository_maintainer ) {    # FIXME is_repo_maintainer
-        return $action->rebase_and_merge ? 0 : 1;
+        $action->rebase_and_merge;
+        return;                                   # always return success
     }
     else {
         # request review from maintainers
-        ...;
+        return $action->request_review_from_repository_maintainers;
     }
 
     return;

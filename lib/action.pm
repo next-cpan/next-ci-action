@@ -6,6 +6,7 @@ use action::Git;
 use action::GitHub;
 use action::Settings;
 use action::PullRequest;
+use action::Repository;
 
 use Test::More;
 
@@ -16,7 +17,6 @@ use action::GitHub::Action qw{WARN ERROR};
 
 use Simple::Accessor qw{
 
-  gh
   git
   cli
 
@@ -28,6 +28,7 @@ use Simple::Accessor qw{
 };
 
 with 'action::Roles::Settings';
+with 'action::Roles::GitHub';    # provides gh accessor
 
 use action::Helpers qw{read_file read_file_no_comments};
 
@@ -41,10 +42,6 @@ sub build ( $self, %options ) {
       or die "Fail to setup Git Repo for PullRequest";
 
     return $self;
-}
-
-sub _build_gh {
-    action::GitHub->new;
 }
 
 sub _build_git($self) {
@@ -72,6 +69,13 @@ sub is_success($self) {
 }
 
 sub is_known_maintainer_for_organization($self) {
+
+}
+
+sub request_review_from_repository_maintainers($self) {
+
+    # enforce a limit to X
+    ...;
 
 }
 
@@ -105,25 +109,8 @@ MSG
         #return;
     }
 
-    my $maintainers_file = $self->settings->get( maintainers => file => );
-    if ( -e $maintainers_file ) {
-        say "# maintainers file found ", $maintainers_file;
-        my $autorized_rules = read_file_no_comments($maintainers_file);
-        foreach my $rule (@$autorized_rules) {
-            return 1 if $author eq $rule;
-            if ( $rule =~ m{^teams/([a-z0-9_]+)} ) {
-                push @check_team_memberships, $1;
-            }
-        }
-    }
-
-    ### need a token to use this request
-    # checking next-cpan teams
-    foreach my $team (@check_team_memberships) {
-        return 1 if $self->gh->is_user_team_member( $author, $team );
-    }
-
-    return;
+    # maybe store the repo
+    return action::Repository->new()->is_maintainer($author);
 }
 
 sub rebase_and_merge($self) {

@@ -2,8 +2,10 @@ package action::GitHub::Action;
 
 use action::std;
 
+use Carp qw{confess};
+
 use Exporter 'import';
-our @EXPORT    = qw/WARN ERROR/;
+our @EXPORT    = qw/WARN ERROR FATAL/;
 our @EXPORT_OK = (@EXPORT);
 
 sub WARN(@msg) {    # display an error message
@@ -14,6 +16,14 @@ sub WARN(@msg) {    # display an error message
 
 sub ERROR(@msg) {    # display a read message
     say '[Error] ', join( ' ', @msg );
+
+    return;
+}
+
+sub FATAL(@msg) {    # display a read message
+
+    ERROR( 'FATAL', @msg );
+    confess( join( ' ', 'FATAL', @msg ) );
 
     return;
 }

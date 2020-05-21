@@ -5,23 +5,21 @@ use action::std;
 use FindBin;
 
 use Simple::Accessor qw{
-  gh
-
   id
   github_repository
   state
-
 };
+
+with 'action::Roles::GitHub';    # provides gh accessor
 
 sub build ( $self, %options ) {
 
-    $self->id                         or die "id is required for creating PullRequest object";
-    ref $self->gh eq 'action::GitHub' or die "Need one action::GitHub object";
+    $self->id or die "id is required for creating PullRequest object";
 
     return $self;
 }
 
-sub _build_state($self) {    # only cache the state then provide accessors
+sub _build_state($self) {        # only cache the state then provide accessors
 
     return $self->gh->get_pr_state( $self->github_repository, $self->id );
 }
