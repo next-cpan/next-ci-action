@@ -5,7 +5,7 @@ use action::std;
 use Carp qw{confess};
 
 use Exporter 'import';
-our @EXPORT    = qw/WARN ERROR FATAL/;
+our @EXPORT    = qw/WARN ERROR FATAL INFO/;
 our @EXPORT_OK = (@EXPORT);
 
 sub WARN(@msg) {    # display an error message
@@ -16,6 +16,12 @@ sub WARN(@msg) {    # display an error message
 
 sub ERROR(@msg) {    # display a read message
     say '[Error] ', join( ' ', @msg );
+
+    return;
+}
+
+sub INFO(@msg) {     # display a read message
+    say '## ', join( ' ', @msg );
 
     return;
 }

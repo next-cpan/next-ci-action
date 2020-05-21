@@ -20,6 +20,8 @@ use Simple::Accessor qw{
   headers
 };
 
+use action::GitHub::Action qw{WARN ERROR FATAL INFO};
+
 use JSON::PP ();
 use action::GitHub::Monitor;
 
@@ -94,6 +96,26 @@ sub add_comment_to_issue ( $self, $issue, $comment ) {
     return $self->post( $uri, { "body" => $comment } );
 }
 
+sub create_request_review ( $self, $issue, $users, $teams = undef ) {
+    $users //= [];
+    $teams //= [];
+
+    return unless scalar @$users || scalar @$teams;
+
+    my ( $repo, $id ) = ( $issue->github_repository, $issue->id );
+    say "# create_request_review to PR #$id for $repo";
+
+    # https://developer.github.com/v3/pulls/review_requests/#create-a-review-request
+    # POST /repos/:owner/:repo/pulls/:pull_number/requested_reviewers
+    my $uri = sprintf( "/repos/%s/pulls/%s/requested_reviewers", $repo, $id );
+
+    my $content = {};
+    $content->{reviewers}      = $users if scalar @$users;
+    $content->{team_reviewers} = $teams if scalar @$teams;
+
+    return $self->post( $uri, $content );
+}
+
 sub get_pr_state ( $self, $repo_full_name, $id ) {
 
     my $uri    = sprintf( "/repos/%s/pulls/%s", $repo_full_name, $id );
@@ -164,44 +186,86 @@ sub get_as_bot ( $self, $uri ) {
     # custom headers just for this request
     my $headers = $self->_build_headers( $ENV{BOT_ACCESS_TOKEN} );
 
-    return $self->ua->get(
+    my $answer = $self->ua->get(
         $self->BASE_API_URL() . $uri,
         {
             headers => $headers,
         }
     );
+
+    _debug_http_answer( $uri, $answer );
+
+    return $answer;
 }
 
 sub get ( $self, $uri ) {
 
-    return $self->ua->get(
+    my $answer = $self->ua->get(
         $self->BASE_API_URL() . $uri,
         {
             headers => $self->headers,
         }
     );
+
+    _debug_http_answer( $uri, $answer );
+
+    return $answer;
 }
 
 sub post ( $self, $uri, $content ) {
 
-    return $self->ua->post(
+    my $answer = $self->ua->post(
         $self->BASE_API_URL() . $uri,
         {
             headers => $self->headers,
             content => $self->encode_content($content),
         }
     );
+
+    _debug_http_answer( $uri, $answer );
+
+    return $answer;
 }
 
 sub patch ( $self, $uri, $content ) {
 
-    return $self->ua->patch(
+    my $answer = $self->ua->patch(
         $self->BASE_API_URL() . $uri,
         {
             headers => $self->headers,
             content => $self->encode_content($content),
         }
     );
+
+    _debug_http_answer( $uri, $answer );
+
+    return $answer;
+}
+
+sub _debug_http_answer ( $uri, $answer ) {
+
+    return unless ref $answer;
+
+    my $status = int( $answer->{status}                                    // 0 );
+    my $msg    = sprintf( "Status: %d %s - %s", $status, $answer->{reason} // '???', $uri );
+
+    my $mod = $status % 100;
+
+    if ( $mod == 2 ) {    # 2xx status
+        INFO($msg);
+    }
+    elsif ( $mod == 4 ) {    # 4xx status
+        WARN($msg);
+    }
+    else {
+        ERROR($msg);
+    }
+
+    if ( $answer->{content} ) {
+        action::GitHub::Action::display_group( "URI $uri", $answer->{content} );
+    }
+
+    return;
 }
 
 sub encode_content ( $self, $content ) {

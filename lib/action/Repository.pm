@@ -24,6 +24,7 @@ with 'action::Roles::GitHub';
 use action::Helpers qw{read_file_no_comments};
 
 sub build ( $self, %options ) {
+
     $self->{root_dir} // FATAL("root_dir unset");
 
     return $self;
@@ -79,16 +80,50 @@ sub is_maintainer ( $self, $author ) {
     return;
 }
 
+sub _shuffle( $list ) {
+    die unless ref $list;
+    my %h = map { $_ => 1 } $list->@*;
+    return [ keys %h ];
+}
+
 sub request_review_from_maintainers($self) {
 
-    # if we got some users only request the users
+    my $asked_counter = 0;
+    my $max           = $self->settings->get( reviewers => maximum => )
+      or FATAL("reviewers.maximum is unset");
+
+    # if we got some users ask code review to a few of them
+    #	use a random list to not always ask the same users...
+    #my $random_users = _shuffle( $self->maintainers->users );
+
+    $self->pull_request->request_review_from( $self->maintainers->users, $self->maintainers->teams );
+
+    # always add a message listing users and teams to notify them there is a pending PR
+    my $list_gh_users = '';
+    $list_gh_users = join "\n", map { "- \@$_" } sort $self->maintainers->users->@*;
+
+    my $org = $self->settings->get( github => org => ) or die "no org";
+
+    my $list_gh_teams = '';
+    $list_gh_teams = join "\n", map { "- \@$org/$_" } sort $self->maintainers->teams->@*;
+
+    my $maintainers_file = $self->settings->get( maintainers => file => )
+      or FATAL("Missing settings for maintainers file");
 
     # if we got some teams != defaults request to members
     # maybe only add a comment
+    $self->pull_request->add_comment( <<"EOS" );
+This Pull Request is waiting for a code review from a maintainer.
+Members from teams or users listed in $maintainers_file can validate or invalidate this patch:
 
-    # otherwise request admin teams members to review
-    # maybe only add a comment
+Teams:
+$list_gh_teams
 
+Users:
+$list_gh_users
+EOS
+
+    return;
 }
 
 1;

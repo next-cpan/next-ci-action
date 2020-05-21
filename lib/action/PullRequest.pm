@@ -80,4 +80,8 @@ sub close ( $self, $comment ) {
     return $self->gh->close_pull_request($self);
 }
 
+sub request_review_from ( $self, $users, $teams ) {
+    return $self->gh->create_request_review( $self, $users, $teams );
+}
+
 1;

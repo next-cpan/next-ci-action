@@ -23,6 +23,10 @@ maintainers:
     - "p5-bulk"
     - "p5-admins"
 
+reviewers:
+  team: p5-reviewers
+  maximum: 20 
+
 rebase:
   retry_max: 6
   timeout: 5
