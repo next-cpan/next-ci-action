@@ -6,8 +6,14 @@ git:
 
 github:
   base_api_url: https://api.github.com
-  org: 'next-cpan'
-  monitor_repo: 'next-monitor'
+  org: next-cpan
+
+  monitor:
+    repo: Next-Monitor-Dashboard
+    issues:      
+      missing_token: 1
+      slash_command: 2
+      #no_response:
 
 maintainers:
   file: .next/maintainers

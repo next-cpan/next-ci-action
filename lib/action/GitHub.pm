@@ -15,10 +15,13 @@ use Simple::Accessor qw{
   default_org
   default_repository
 
+  monitor
+
   headers
 };
 
 use JSON::PP ();
+use action::GitHub::Monitor;
 
 use Test::More;
 
@@ -55,6 +58,10 @@ sub _build_github_token {
 
 sub _build_json {
     return JSON::PP->new->utf8->relaxed->allow_nonref;
+}
+
+sub _build_monitor($self) {
+    return action::GitHub::Monitor->new( github => $self );
 }
 
 sub BASE_API_URL ($self) {
@@ -147,14 +154,10 @@ sub get_as_bot ( $self, $uri ) {
 
     if ( !$ENV{BOT_ACCESS_TOKEN} ) {
 
-        # FIXME setup the admin group here
-        ### ... could consider posting a comment to a repo which automatically setup the TOKEN for us
-        ### view https://github.com/marketplace/actions/slash-command-dispatch
-        ### /need-token $REPO $PR JOB_ID
-        #$self->add_comment("**WARNING:** missing BOT_ACCESS_TOKEN in the repository. Please contact an \@admin-group");
+        $self->monitor->slash_setup( $ENV{GITHUB_REPOSITORY} );
+        $self->monitor->report_missing_token_for_repository( $ENV{GITHUB_REPOSITORY} );
 
-        ## FIXME report to the dashboard ?
-
+        # action::exception::MissingBotToken->new(); # FIXME raise an exception
         die "missing BOT_ACCESS_TOKEN";
     }
 
