@@ -12,6 +12,8 @@ use Test::More;
 use File::pushd;
 use Cwd;
 
+use action::GitHub::Action qw{WARN ERROR};
+
 use Simple::Accessor qw{
 
   gh
@@ -147,13 +149,14 @@ sub rebase_and_merge($self) {
             return 1;
         }
 
-        say "[Warning] rebase + push failure, sleep and retry";
+        WARN("Rebase + Push failure, sleep and retry");
 
         sleep($timeout);
         $self->git->run( 'fetch', 'origin' );
     }
 
-    say "[Error] fail to push to upstream repo after $retry_max attempts.";
+    ERROR("fail to push to upstream repo after $retry_max attempts.");
+
     $self->pull_request->add_comment("**Clean PR** fail to push to upstream repo after $retry_max attempts.");
 
     return;

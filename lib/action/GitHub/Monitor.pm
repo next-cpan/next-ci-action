@@ -3,6 +3,7 @@ package action::GitHub::Monitor;
 use action::std;
 
 use action::GitHub::Issue;
+use action::GitHub::Action qw{WARN ERROR};
 
 use Simple::Accessor qw{
   github
@@ -29,12 +30,12 @@ sub slash_command ( $self, $command, @args ) {
 
 sub slash_setup ( $self, $full_repo ) {
     if ( !$full_repo ) {
-        say '[Error] /setup called without a repository name';
+        ERROR('/setup called without a repository name');
         return;
     }
 
     if ( !index( '/', $full_repo ) ) {
-        say '[Error] /setup called without a complete repository name: ', $full_repo;
+        ERROR( '/setup called without a complete repository name: ', $full_repo );
         return;
     }
 
