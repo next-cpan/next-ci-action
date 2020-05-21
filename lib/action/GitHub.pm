@@ -89,7 +89,8 @@ sub add_comment_to_issue ( $self, $issue, $comment ) {
     return unless defined $comment;
 
     my ( $repo, $id ) = ( $issue->github_repository, $issue->id );
-    say "adding a comment to the Pull Request #$id for $repo $comment";
+    WARN("Adding a comment to the Pull Request #$id for $repo");
+    INFO($comment);
 
     my $uri = sprintf( "/repos/%s/issues/%s/comments", $repo, $id );
 
@@ -249,12 +250,10 @@ sub _debug_http_answer ( $uri, $answer ) {
     my $status = int( $answer->{status}                                    // 0 );
     my $msg    = sprintf( "Status: %d %s - %s", $status, $answer->{reason} // '???', $uri );
 
-    my $mod = $status % 100;
-
-    if ( $mod == 2 ) {    # 2xx status
+    if ( 200 <= $status && $status < 300 ) {    # 2xx status
         INFO($msg);
     }
-    elsif ( $mod == 4 ) {    # 4xx status
+    elsif ( 300 <= $status && $status < 400 ) {    # 4xx status
         WARN($msg);
     }
     else {
