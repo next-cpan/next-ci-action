@@ -144,6 +144,7 @@ sub rebase_and_merge($self) {
         my $ok  = $? == 0;
         if ($ok) {
             $self->pull_request->close("**Clean PR** from Maintainer merged to $target_branch branch");
+            return 1;
         }
 
         say "[Warning] rebase + push failure, sleep and retry";
