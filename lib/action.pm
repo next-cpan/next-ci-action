@@ -149,7 +149,7 @@ sub rebase_and_merge($self) {
         say "[Warning] rebase + push failure, sleep and retry";
 
         sleep($timeout);
-        my $out = $self->git->run( 'fetch', 'origin' );
+        $self->git->run( 'fetch', 'origin' );
     }
 
     say "[Error] fail to push to upstream repo after $retry_max attempts.";
