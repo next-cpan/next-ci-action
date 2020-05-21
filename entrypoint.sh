@@ -14,6 +14,13 @@ set
 echo "============================================="
 echo ::endgroup::
 
+echo "::group::Check Tokens"
+echo "============================================="
+perl -E 'say "GITHUB_TOKEN => ", length($ENV{GITHUB_TOKEN} // "")'
+perl -E 'say "BOT_ACCESS_TOKEN => ", length($ENV{BOT_ACCESS_TOKEN} // "")'
+echo "============================================="
+echo ::endgroup::
+
 # input arguments
 
 # setting it is not really needed
