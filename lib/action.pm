@@ -79,10 +79,7 @@ sub is_known_maintainer_for_organization($self) {
 }
 
 sub request_review_from_repository_maintainers($self) {
-
-    # enforce a limit to X
-    ...;
-
+    return $self->repository->request_review_from_maintainers($author);
 }
 
 # check if the action is coming from a maintainer
